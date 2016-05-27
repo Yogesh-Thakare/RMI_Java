@@ -1,16 +1,17 @@
 package dsms.rmi.objects;
 
-public class DoctorRecord {
-	
-	String firstName;
-	String lastName;
+public class DoctorRecord extends Practitioner{
+
 	String address;
 	String phone;
 	String specialization;
 	String location;
 	
-	DoctorRecord(String firstName, String lastName, String address, String phone, String specialization,
+	
+	public DoctorRecord(String recordID,String firstName, String lastName, String address, String phone, String specialization,
 			String location) {
+		
+		super(recordID,firstName,lastName);
 		this.firstName=firstName;
 		this.lastName=lastName;
 		this.address=address;
@@ -18,18 +19,7 @@ public class DoctorRecord {
 		this.specialization=specialization;
 		this.location=location;
 	}
-	public String getFirstName() {
-		return firstName;
-	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-	public String getLastName() {
-		return lastName;
-	}
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+
 	public String getAddress() {
 		return address;
 	}

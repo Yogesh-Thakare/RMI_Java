@@ -2,33 +2,19 @@ package dsms.rmi.objects;
 
 import java.util.Date;
 
-public class NurseRecord {
-	
-	String firstName;
-	String lastName;
+public class NurseRecord extends Practitioner{
 	String designation;
 	String status;
 	Date statusDate;
 	
-	NurseRecord(String firstName, String lastName, String designation, String status, Date statusDate)	{
-		this.firstName=firstName;
-		this.lastName=lastName;
+	public NurseRecord(String recordID,String firstName, String lastName, String designation, String status, Date statusDate)	{
+		
+		super(recordID,firstName,lastName);
 		this.designation=designation;
 		this.status=status;
 		this.statusDate=statusDate;
 	}
-	public String getFirstName() {
-		return firstName;
-	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-	public String getLastName() {
-		return lastName;
-	}
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+
 	public String getDesignation() {
 		return designation;
 	}
