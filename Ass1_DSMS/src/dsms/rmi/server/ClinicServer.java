@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import dsms.rmi.intermediate.ManagerInterface;
 import dsms.rmi.objects.DoctorRecord;
 import dsms.rmi.objects.NurseRecord;
@@ -69,6 +68,36 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	public int getUDPPort()
 	{
 		return this.UDPPort;
+	}
+	
+	public void run()
+	{
+		DatagramSocket socket = null;
+
+		try
+		{
+			socket = new DatagramSocket(this.UDPPort);
+			byte[] message = new byte[10000];
+			//Logger call
+
+			while(true)
+			{
+				DatagramPacket request = new DatagramPacket(message, message.length);
+				socket.receive(request);
+				String data = new String(request.getData());
+				String response = getRecordsFromServer(data);
+				DatagramPacket reply = new DatagramPacket(response.getBytes(),response.length(),request.getAddress(),request.getPort());
+				socket.send(reply);
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			socket.close();
+		}
 	}
 
 
@@ -165,7 +194,9 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		Iterator<?> it = practitionerRecords.entrySet().iterator();
 		while(it.hasNext())
 		{
+			@SuppressWarnings("rawtypes")
 			Map.Entry pair = (Map.Entry)it.next();
+			@SuppressWarnings("unchecked")
 			ArrayList<Practitioner> practitionerList = (ArrayList<Practitioner>) pair.getValue();
 			if(!practitionerList.isEmpty())
 			{					
@@ -267,8 +298,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	
 	
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
-
-		// TODO Auto-generated method stub
+		
 		int defaultRegistryPort = 1099;
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
 
@@ -300,9 +330,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		clinicServers.add(MTLServer);
 		clinicServers.add(LVLServer);
 		clinicServers.add(DDOServer);
-
-
-
 
 	}
 
