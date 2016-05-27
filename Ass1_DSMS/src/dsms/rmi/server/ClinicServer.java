@@ -43,7 +43,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	public ClinicServer(String clinicName)
 	{
 		this.clinicName = clinicName;
-		this.setLogger("logs/library/"+clinicName+".txt");
+		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
 	public ClinicServer(String clinicName, int portNumber) {
