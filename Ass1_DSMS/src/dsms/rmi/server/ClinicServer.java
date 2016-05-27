@@ -53,10 +53,10 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-	private void setLogger(String instituteName) {
+	private void setLogger(String clinicName) {
 		try{
 			this.logger = Logger.getLogger(this.clinicName);
-			FileHandler fileTxt 	 = new FileHandler(instituteName);
+			FileHandler fileTxt 	 = new FileHandler(clinicName);
 			SimpleFormatter formatterTxt = new SimpleFormatter();
 			fileTxt.setFormatter(formatterTxt);
 			logger.addHandler(fileTxt);
@@ -86,7 +86,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			}
 			practitionerList.add(Practitioner);
 			
-			logger.info("New Doctor Record added to the clinic with record ID : "+((DoctorRecord)Practitioner).getRecordID());
+			logger.info("New Doctor Record added to the clinic with record ID : "+Practitioner.getRecordID());
 
 		}
 		return true;
@@ -106,7 +106,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			}
 			practitionerList.add(Practitioner);
 				
-				logger.info("New Nurse Record added to the clinic with record ID : "+((DoctorRecord)Practitioner).getRecordID());
+			logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
 
 		}
 		return true;
@@ -139,6 +139,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 							socket.receive(reply);
 							response+=new String(reply.getData());
 						}
+						
 						catch(Exception ex)
 						{
 							ex.printStackTrace();
@@ -150,6 +151,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 					}
 				}
 			}
+			logger.info("Successfully fetched record counts from all servers using UDP as: "+response);
 			
 		return response;
 	}
@@ -232,11 +234,12 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			}
 			
 		}
+		logger.info("Record updated for recordID: "+recordID);
 		return true;
 	}
 	
 	
-	public static void addData(ClinicServer server) throws RemoteException
+	public static void loadData(ClinicServer server) throws RemoteException
 	{
 		server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "mtl");
 		server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
@@ -245,6 +248,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("2016-05-20"));
 		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("2014-05-24"));
 		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("2016-05-21"));	
+		
+		
 	}
 	
 	public static Date getFormattedDate(String dateStr)
@@ -287,9 +292,9 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		DDOServer.start();
 		System.out.println("Dollard server up and running!");
 
-		addData(MTLServer);
-		addData(LVLServer);
-		addData(DDOServer);
+		loadData(MTLServer);
+		loadData(LVLServer);
+		loadData(DDOServer);
 
 		clinicServers = new ArrayList<ClinicServer>();
 		clinicServers.add(MTLServer);
