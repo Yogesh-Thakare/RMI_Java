@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,11 +25,11 @@ public class ManagerClient {
 	public void InitializeServer() throws Exception {
 		System.setSecurityManager(new RMISecurityManager());
 		MTLServer = (ManagerInterface) Naming
-				.lookup("rmi://localhost:1099/6001");
+				.lookup("rmi://localhost:1099/MTL");
 		LVLServer = (ManagerInterface) Naming
-				.lookup("rmi://localhost:1099/6002");
+				.lookup("rmi://localhost:1099/LVL");
 		DDOServer = (ManagerInterface) Naming
-				.lookup("rmi://localhost:1099/6003");
+				.lookup("rmi://localhost:1099/DDO");
 	}
 
 	public ManagerInterface ServerValidation(Scanner keyboard) {
