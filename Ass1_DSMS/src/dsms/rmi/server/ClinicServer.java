@@ -33,8 +33,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	private int UDPPort;
 	private static ArrayList<ClinicServer> clinicServers = null;
 	private Logger logger;
-	static int drRecord=10001;
-	static int nrRecord=10001;
+	static int drRecord=10000;
+	static int nrRecord=10000;
 	public ClinicServer()
 	{
 	}
@@ -104,7 +104,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	@Override
 	public boolean createDRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) throws RemoteException {
-		
+		drRecord++;
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
 		synchronized(practitionerRecords) {
@@ -113,18 +113,30 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				practitionerList = new ArrayList<Practitioner>();
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
 			}
+			else if(checkUniqueRecord(Practitioner.getRecordID(),lastName.charAt(0)))
+			{
 			practitionerList.add(Practitioner);
+			}
+			else
+			{
+				logger.info("Failed to add Doctor Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+			}
 			
 			logger.info("New Doctor Record added to the clinic with record ID : "+Practitioner.getRecordID());
 
 		}
 		return true;
 	}
+	
+
+	
+	
 
 	@Override
 	public boolean createNRecord(String firstName, String lastName, String designation, String status, Date statusDate)
 			throws RemoteException {
 
+		nrRecord++;
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
 		synchronized(practitionerRecords) {
@@ -133,13 +145,34 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				practitionerList = new ArrayList<Practitioner>();
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
 			}
+			else if(checkUniqueRecord(Practitioner.getRecordID(),lastName.charAt(0)))
+			{
 			practitionerList.add(Practitioner);
+			}
+			else
+			{
+				logger.info("Failed to add Nurse Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+			}
 				
 			logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
 
 		}
 		return true;
 		
+	}
+	
+	public boolean checkUniqueRecord( String recordID,Character chactr)
+	{
+		boolean isUnique=true;
+		
+		for(Practitioner practitioner:practitionerRecords.get(chactr))
+		{
+			practitioner.getRecordID().equals(recordID);
+			isUnique=false;
+			break;
+		}
+		
+		return isUnique;
 	}
 
 	@Override
