@@ -243,6 +243,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			}
 		}
 		recordString.append(recordCount);
+		recordString.append("\n");
 		return recordString.toString();
 	}
 
