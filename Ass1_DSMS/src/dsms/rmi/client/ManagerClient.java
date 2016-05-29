@@ -1,11 +1,8 @@
 package dsms.rmi.client;
 
-import java.io.File;
-import java.io.FileWriter;
+
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,7 +36,8 @@ public class ManagerClient {
 		while (!valid) {
 			try {
 				ManagerID = keyboard.nextLine();
-				String locationName = ManagerID.substring(0, 2);
+				String locationName = ManagerID.substring(0, 3);
+				System.out.println(locationName);
 				server = LocateServer(locationName);
 				if (server != null) {
 					valid = true;
@@ -58,12 +56,12 @@ public class ManagerClient {
 	}
 
 	// Get Server Connection
-	public static ManagerInterface LocateServer(String locationName) {
-		if (locationName.equals(MTL)) {
+	public ManagerInterface LocateServer(String locationName) {
+		if (locationName.equals("MTL")) {
 			return MTLServer;
-		} else if (locationName.equals(LVL)) {
+		} else if (locationName.equals("LVL")) {
 			return LVLServer;
-		} else if (locationName.equals(DDO)) {
+		} else if (locationName.equals("DDO")) {
 			return DDOServer;
 		}
 		return null;
@@ -117,7 +115,7 @@ public class ManagerClient {
 			userInput = Integer.parseInt(InputStringValidation(keyboard));
 			String firstName, lastName,address,phone,specialization,location;
 			String designation,status,statusdate,recordType,recordID,fieldName,newValue;
-			//boolean success = false;
+			//boolean success = true;
 
 			while(true)
 			{
@@ -137,15 +135,15 @@ public class ManagerClient {
 					specialization = InputStringValidation(keyboard);
 					System.out.println("Location: ");
 					location = InputStringValidation(keyboard);
-
-					//TODO what to do with institute name
 					
 					//objClient.logger.info("Non Returner retrieved on :"+ System.currentTimeMillis());
 					boolean resultDRecord;
 					resultDRecord = objServer.createDRecord (firstName,lastName,address,phone,specialization,location);
 					if(resultDRecord)
 					System.out.println("Doctor  Record Created Successfully by" + ManagerID);
+					//success=false;
 					showMenu();
+					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
 				case 2:
 					System.out.println("Please Enter below information: ");
@@ -161,7 +159,7 @@ public class ManagerClient {
 					System.out.println("Status Date(dd-MM-yyyy): ");
 					statusdate = scanner.next();
 					
-					SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+					SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 					Date date2=null;
 					try {
 					    //Parsing the String
@@ -178,15 +176,19 @@ public class ManagerClient {
 					resultNRecord = objServer.createNRecord (firstName,lastName,designation,status,date2);
 					if(resultNRecord)
 					System.out.println("Nurse Record Created Successfully by" + ManagerID);
+					//success=false;
 					showMenu();
+					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
 				case 3:
 					System.out.println("Please Enter below information: ");
 					System.out.println("Record Type: ");
 					recordType = InputStringValidation(keyboard);
 					String count=objServer.getRecordCounts (recordType);
-					System.out.println("The Count for the " + recordType + "is :" + count );
+					System.out.println("The Count for the " + recordType + " Records is :" + count );
+					//success=false;
 					showMenu();
+					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
 				case 4:
 					System.out.println("Please Enter below information: ");
@@ -201,7 +203,9 @@ public class ManagerClient {
 					editRecordResult=objServer.editRecord(recordID,fieldName,newValue);
 					if(editRecordResult)
 					System.out.println("Edit Record successfully by " + ManagerID);
+					//success=false;
 					showMenu();
+					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
 				case 5:
 					System.out.println("Have a nice day!");
