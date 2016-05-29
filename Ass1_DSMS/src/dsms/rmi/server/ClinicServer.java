@@ -253,17 +253,17 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		
 		if(recordID.startsWith("DR")&&fieldName.equalsIgnoreCase("location") && !newValue.equalsIgnoreCase("mtl")||!newValue.equalsIgnoreCase("lvl")||!newValue.equalsIgnoreCase("ddo"))
 		{
-			logger.info(" could not update doctor record with record ID: "+recordID+"Invalid data for field name: "+fieldName);
+			logger.info(" could not update doctor record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
 		}
 		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !newValue.equalsIgnoreCase("junior")&& !newValue.equalsIgnoreCase("senior"))
 		{
-			logger.info(" could not update nurse record with record ID: "+recordID+"Invalid data for field name: "+fieldName);
+			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
 		}
 		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !newValue.equalsIgnoreCase("terminated")&& !newValue.equalsIgnoreCase("active"))
 		{
-			logger.info(" could not update nurse record with record ID: "+recordID+"Invalid data for field name: "+fieldName);
+			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
 		}
 		else if(fieldName.equals("address")||fieldName.equals("phone")||fieldName.equals("location")||
