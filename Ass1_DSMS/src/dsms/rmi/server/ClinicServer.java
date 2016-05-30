@@ -356,9 +356,9 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		DDOServer.start();
 		System.out.println("Dollard server up and running!");
 
-		loadData(MTLServer);
-		loadData(LVLServer);
-		loadData(DDOServer);
+		//loadData(MTLServer);
+		//loadData(LVLServer);
+		//loadData(DDOServer);
 
 		clinicServers = new ArrayList<ClinicServer>();
 		clinicServers.add(MTLServer);
