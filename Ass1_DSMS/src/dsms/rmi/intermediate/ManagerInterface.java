@@ -10,5 +10,4 @@ public interface ManagerInterface extends Remote
 	public boolean createNRecord (String firstName, String lastName, String designation, String status, Date statusDate) throws RemoteException;
 	public String getRecordCounts (String recordType) throws RemoteException;
 	public boolean editRecord (String recordID, String fieldName, String newValue)throws RemoteException;
-
 }
