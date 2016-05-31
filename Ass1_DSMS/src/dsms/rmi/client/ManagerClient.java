@@ -9,11 +9,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
 
 import dsms.rmi.intermediate.ManagerInterface;
 
@@ -28,6 +30,7 @@ public class ManagerClient extends Thread{
 	protected static String ManagerID;
 
 	public ManagerClient(String string) {
+		
 		// TODO Auto-generated constructor stub
 		this.setName(string);
 		scanner = new Scanner(System.in);
@@ -40,13 +43,20 @@ public class ManagerClient extends Thread{
 	{
 		System.setProperty("java.security.policy","file:./security.policy");
 		List<ManagerClient> testClients=new ArrayList<ManagerClient>();
+		
 		ManagerClient manager1 = new ManagerClient("ClientManager1");
 		ManagerClient manager2 = new ManagerClient("ClientManager2");
 		ManagerClient manager3 = new ManagerClient("ClientManager3");
+		ManagerClient manager4 = new ManagerClient("ClientManager4");
+		ManagerClient manager5 = new ManagerClient("ClientManager5");
+		ManagerClient manager6 = new ManagerClient("ClientManager6");
 		
 		testClients.add(manager1);
 		testClients.add(manager2);
 		testClients.add(manager3);
+		testClients.add(manager4);
+		testClients.add(manager5);
+		testClients.add(manager6);
 		
 		return testClients;
 		
@@ -353,4 +363,7 @@ public class ManagerClient extends Thread{
 			log.info("Log File Error: " + e.getMessage());
 		}
 	}
+	
+
+	
 }
