@@ -1,7 +1,7 @@
 package dsms.rmi.objects;
 
-public class Practitioner {
-	
+public class Practitioner 
+{
 	String recordID;
 	String firstName;
 	String lastName;
@@ -13,23 +13,28 @@ public class Practitioner {
 		this.lastName=lastName;
 	}
 	
-	public String getRecordID() {
+	public String getRecordID() 
+	{
 		return recordID;
 	}
-	public void setRecordID(String recordID) {
+	public void setRecordID(String recordID) 
+	{
 		this.recordID = recordID;
 	}
-	public String getFirstName() {
+	public String getFirstName() 
+	{
 		return firstName;
 	}
-	public void setFirstName(String firstName) {
+	public void setFirstName(String firstName) 
+	{
 		this.firstName = firstName;
 	}
-	public String getLastName() {
+	public String getLastName() 
+	{
 		return lastName;
 	}
-	public void setLastName(String lastName) {
+	public void setLastName(String lastName) 
+	{
 		this.lastName = lastName;
 	}
-
 }

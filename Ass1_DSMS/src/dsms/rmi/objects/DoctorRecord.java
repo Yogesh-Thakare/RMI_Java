@@ -1,6 +1,7 @@
 package dsms.rmi.objects;
 
-public class DoctorRecord extends Practitioner{
+public class DoctorRecord extends Practitioner
+{
 
 	String address;
 	String phone;
@@ -9,8 +10,8 @@ public class DoctorRecord extends Practitioner{
 	
 	
 	public DoctorRecord(String recordID,String firstName, String lastName, String address, String phone, String specialization,
-			String location) {
-		
+			String location) 
+	{	
 		super(recordID,firstName,lastName);
 		this.firstName=firstName;
 		this.lastName=lastName;
@@ -20,29 +21,36 @@ public class DoctorRecord extends Practitioner{
 		this.location=location;
 	}
 
-	public String getAddress() {
+	public String getAddress() 
+	{
 		return address;
 	}
-	public void setAddress(String address) {
+	public void setAddress(String address) 
+	{
 		this.address = address;
 	}
-	public String getPhone() {
+	public String getPhone() 
+	{
 		return phone;
 	}
-	public void setPhone(String phone) {
+	public void setPhone(String phone) 
+	{
 		this.phone = phone;
 	}
-	public String getSpecialization() {
+	public String getSpecialization() 
+	{
 		return specialization;
 	}
-	public void setSpecialization(String specialization) {
+	public void setSpecialization(String specialization) 
+	{
 		this.specialization = specialization;
 	}
-	public String getLocation() {
+	public String getLocation() 
+	{
 		return location;
 	}
-	public void setLocation(String location) {
+	public void setLocation(String location) 
+	{
 		this.location = location;
 	}
-
 }
