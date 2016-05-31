@@ -1,7 +1,12 @@
 package dsms.rmi.objects;
 
-public class Practitioner 
-{
+
+/**
+ * Parent class for storing object in HashMap
+ *
+ */
+public class Practitioner {
+
 	String recordID;
 	String firstName;
 	String lastName;
