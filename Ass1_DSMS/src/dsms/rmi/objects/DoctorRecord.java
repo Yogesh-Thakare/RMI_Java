@@ -1,7 +1,14 @@
 package dsms.rmi.objects;
 
+
+/**
+ * Stores Doctor's record
+ *
+ */
+
 public class DoctorRecord extends Practitioner
 {
+
 
 	String address;
 	String phone;
