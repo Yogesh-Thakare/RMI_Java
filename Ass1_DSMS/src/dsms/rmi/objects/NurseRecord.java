@@ -2,8 +2,16 @@ package dsms.rmi.objects;
 
 import java.util.Date;
 
+/**
+ * /**
+ * Stores Nurse's record
+ *
+ */
+ 
+
 public class NurseRecord extends Practitioner
 {
+
 	String designation;
 	String status;
 	Date statusDate;
