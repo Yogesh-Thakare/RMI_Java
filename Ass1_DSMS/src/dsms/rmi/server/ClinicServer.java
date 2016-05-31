@@ -28,7 +28,8 @@ import dsms.rmi.objects.DoctorRecord;
 import dsms.rmi.objects.NurseRecord;
 import dsms.rmi.objects.Practitioner;
 
-public class ClinicServer extends Thread implements ManagerInterface {
+public class ClinicServer extends Thread implements ManagerInterface 
+{
 	
 	private HashMap<Character, ArrayList<Practitioner>> practitionerRecords = 
 			new HashMap<Character, ArrayList<Practitioner>>();
@@ -49,22 +50,26 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-	public ClinicServer(String clinicName, int portNumber)  {
+	public ClinicServer(String clinicName, int portNumber)  
+	{
 		// TODO Auto-generated constructor stub
 		this.clinicName = clinicName;
 		UDPPort = portNumber;
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-	private void setLogger(String clinicName) {
-		try{
+	private void setLogger(String clinicName) 
+	{
+		try
+		{
 			this.logger = Logger.getLogger(this.clinicName);
 			FileHandler fileTxt 	 = new FileHandler(clinicName);
 			SimpleFormatter formatterTxt = new SimpleFormatter();
 			fileTxt.setFormatter(formatterTxt);
 			logger.addHandler(fileTxt);
 		}
-		catch(Exception err) {
+		catch(Exception err) 
+		{
 			System.out.println("Failed to initiate logger. Please check file permission");
 		}
 	}
@@ -108,11 +113,13 @@ public class ClinicServer extends Thread implements ManagerInterface {
 
 	@Override
 	public boolean createDRecord(String firstName, String lastName, String address, String phone, String specialization,
-			String location) throws RemoteException {
+			String location) throws RemoteException 
+	{
 		++drRecord;
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
-		synchronized(practitionerRecords) {
+		synchronized(practitionerRecords) 
+		{
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
 			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
 			{
@@ -129,32 +136,28 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				logger.info("Failed to add Doctor Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
 				return false;
 			}
-			
-
 			logger.info("Doctor Record created :\nRecordID \"" +  "DR"+drRecord +  "\", FirstName \"" +  firstName + 
 					"\", LastName \"" +  lastName +  "\", Address \"" +  address +  "\", Phone \"" + phone + "\", Specialization \"" + 
 					specialization + "\", Location \""+location+"\"");
 			
 			return true;
 
-		}
-		
+		}	
 	}
 	
-
-	
-	
-
 	@Override
 	public boolean createNRecord(String firstName, String lastName, String designation, String status, Date statusDate)
-			throws RemoteException {
+			throws RemoteException 
+	{
 
 		++nrRecord;
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
-		synchronized(practitionerRecords) {
+		synchronized(practitionerRecords) 
+		{
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
-			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0))) {
+			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0))) 
+			{
 				practitionerList = new ArrayList<Practitioner>();
 				practitionerList.add(Practitioner);
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
@@ -170,16 +173,11 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				logger.info("Failed to add Nurse Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
 				return false;
 			}
-				
-
 			logger.info("Nurse Record created :\nRecordID \"" +  "NR"+nrRecord +  "\", FirstName \"" +  firstName + 
 					"\", LastName \"" +  lastName +  "\", Designation \"" +  designation +  "\", status \"" + status + "\", StatusDate \"" + 
 					statusDate+ "\"" );
 			return true;
-
-		}
-		
-		
+		}	
 	}
 	
 	public boolean checkUniqueRecord( String recordID,String fName,String lName,Character chactr)
@@ -198,7 +196,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	}
 
 	@Override
-	public String getRecordCounts(String recordType) throws RemoteException {
+	public String getRecordCounts(String recordType) throws RemoteException 
+	{
 	String response = null;
 		
 			response += getRecordsFromServer(recordType);
@@ -221,8 +220,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 							DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 							socket.receive(reply);
 							response+=new String(reply.getData());
-						}
-						
+						}	
 						catch(Exception ex)
 						{
 							ex.printStackTrace();
@@ -234,11 +232,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 					}
 				}
 			}
-			logger.info("Successfully fetched record counts from all servers using UDP as: "+response);
-			
-		return response;
-		
-		 
+			logger.info("Successfully fetched record counts from all servers using UDP as: "+response);		
+		return response;	 
 	}
 	
 	private String getRecordsFromServer(String recordType)
@@ -268,9 +263,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		return recordString.toString();
 	}
 
-	
-	
-
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException {
 	
@@ -296,7 +288,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				fieldName.equalsIgnoreCase("designation")||fieldName.equalsIgnoreCase("status")||fieldName.equalsIgnoreCase("statusDate"))
 		{
 			Practitioner practitionerUpdate=null;
-			synchronized(practitionerRecords) {
+			synchronized(practitionerRecords) 
+			{
 				
 				boolean recordFound=false;
 			    for (Map.Entry<Character, ArrayList<Practitioner>> entry : practitionerRecords.entrySet())
@@ -375,27 +368,28 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		
 		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
 		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("24-05-2015"));
-		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));	
-		
-		
+		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
 		
 	}
 	
 	public static Date getFormattedDate(String dateStr)
 	{
 		Date formattedDate=null;
-	try {
-		DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-		formattedDate =sdf.parse(dateStr);
-	} catch (ParseException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	return formattedDate;
+		try 
+		{
+			DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			formattedDate =sdf.parse(dateStr);
+		} 
+		catch (ParseException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return formattedDate;
 	}
 	
-	
-	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
+	public static void main(String[] args) throws RemoteException, AlreadyBoundException 
+	{
 		
 		int defaultRegistryPort = 1099;
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
