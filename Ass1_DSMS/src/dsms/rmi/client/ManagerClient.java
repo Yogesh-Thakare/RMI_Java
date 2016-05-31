@@ -248,8 +248,10 @@ public class ManagerClient extends Thread
 					boolean resultDRecord;
 					resultDRecord = objServer.createDRecord (firstName,lastName,address,phone,specialization,location);
 					if(resultDRecord)
+					{
 					System.out.println("Doctor  Record Created Successfully by " + ManagerID);
 					ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
+					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
@@ -283,8 +285,10 @@ public class ManagerClient extends Thread
 					boolean resultNRecord;
 					resultNRecord = objServer.createNRecord (firstName,lastName,designation,status,date2);
 					if(resultNRecord)
+					{
 					System.out.println("Nurse Record Created Successfully by" + ManagerID);
 					ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
+					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
