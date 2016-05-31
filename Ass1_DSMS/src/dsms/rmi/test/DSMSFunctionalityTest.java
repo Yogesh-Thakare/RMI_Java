@@ -123,14 +123,20 @@ public class DSMSFunctionalityTest {
 	@Test
 	public void testGetRecordCount() throws Exception {
 		
-		//String expected=new String("MTL 6, LVL 7, DDO 8");
-		String expected="MTL 6, LVL 7, DDO 8";
+		
+		//String expected="MTL 3, LVL 3, DDO 3";
 		
 		ManagerInterface objServer1= managerMTL.ServerAccess("MTL1111");
 		assertTrue(objServer1.getRecordCounts("DR") instanceof String);
 		
-		String response =objServer1.getRecordCounts("DR");
-		assertEquals(expected, response);
+		ManagerInterface objServer2= managerLVL.ServerAccess("LVL1111");
+		assertTrue(objServer2.getRecordCounts("DR") instanceof String);
+		
+		ManagerInterface objServer3= managerDDO.ServerAccess("DDO1111");
+		assertTrue(objServer3.getRecordCounts("NR") instanceof String);
+		
+		//String response =objServer1.getRecordCounts("DR");
+		//assertEquals(expected, response);
 		
 	
 		
