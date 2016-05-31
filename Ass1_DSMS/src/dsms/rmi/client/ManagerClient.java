@@ -17,6 +17,10 @@ import java.util.logging.SimpleFormatter;
 
 import dsms.rmi.intermediate.ManagerInterface;
 
+/**
+ * This represents client which is itself thread object for implementing multithreading demo
+ *
+ */
 public class ManagerClient extends Thread
 {
 	private static Logger log;
@@ -30,7 +34,6 @@ public class ManagerClient extends Thread
 
 	public ManagerClient(String string) 
 	{
-		// TODO Auto-generated constructor stub
 		this.setName(string);
 		scanner = new Scanner(System.in);
 		createLog();
@@ -38,6 +41,9 @@ public class ManagerClient extends Thread
 		this.start();
 	}
 	
+	/**
+	 * @return clients as a objects of thread
+	 */
 	public static List<ManagerClient> getClients()
 	{
 		System.setProperty("java.security.policy","file:./security.policy");
@@ -52,7 +58,21 @@ public class ManagerClient extends Thread
 		
 		return testClients;	
 	}
+	
+	public ManagerInterface ServerAccess(String manager) 
+	{
+		ManagerInterface server = null;
+				String locationName = manager.substring(0, 3);
+				System.out.println(locationName);
+				server = LocateServer(locationName);
+		return server;
+	}
 
+	/**
+	 * connects to one of three server instances
+	 * @param server to which connection required
+	 * @throws Exception
+	 */
 	public void InitializeServer(String server) throws Exception 
 	{
 		System.setSecurityManager(new RMISecurityManager());
@@ -71,41 +91,42 @@ public class ManagerClient extends Thread
 			DDOServer = (ManagerInterface) Naming
 					.lookup("rmi://localhost:1099/DDO");
 		}
-
 	}
 
-	public ManagerInterface ServerValidation(Scanner keyboard) {
+	/**
+	 * validates input from client
+	 * @param keyboard
+	 * @return
+	 */
+	public ManagerInterface ServerValidation(Scanner keyboard) 
+	{
 		Boolean valid = false;
 		ManagerInterface server = null;
 		System.out.println("Enter Manager ID");
-		while (!valid) {
-			try {
+		while (!valid) 
+		{
+			try 
+			{
 				ManagerID = keyboard.nextLine();
 				String locationName = ManagerID.substring(0, 3);
 				System.out.println(locationName);
 				server = LocateServer(locationName);
-				if (server != null) {
+				if (server != null) 
+				{
 					valid = true;
-				} else {
+				} 
+				else 
+				{
 					System.out.println("Invalid Manager ID");
 					keyboard.nextLine();
 				}
-			} catch (Exception e) {
+			} catch (Exception e) 
+			{
 				System.out.println("Invalid Manager ID");
 				valid = false;
 				keyboard.nextLine();
 			}
 		}
-		// keyboard.nextLine();
-		return server;
-	}
-	
-	public ManagerInterface ServerAccess(String manager) 
-	{
-		ManagerInterface server = null;
-				String locationName = manager.substring(0, 3);
-				System.out.println(locationName);
-				server = LocateServer(locationName);
 		return server;
 	}
 
@@ -179,6 +200,10 @@ public class ManagerClient extends Thread
 			}		
 }
 	
+	/**
+	 * runs console to accept input from manager
+	 * 
+	 */
 	public static void runTerminal ()
 	{
 		try
@@ -339,6 +364,10 @@ public class ManagerClient extends Thread
 		}
 	}
 		
+	/**
+	 * creates log file for each manager who gets in to system
+	 * 
+	 */
 	public void createLog()
 	{
 		try {
