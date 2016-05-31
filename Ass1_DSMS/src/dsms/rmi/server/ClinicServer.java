@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
 import dsms.rmi.intermediate.ManagerInterface;
 import dsms.rmi.objects.DoctorRecord;
 import dsms.rmi.objects.NurseRecord;
@@ -268,13 +269,13 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			logger.info(" could not update doctor record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);			
 			
 		}
-		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !(newValue.equalsIgnoreCase("junior")&& newValue.equalsIgnoreCase("senior")))
+		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !(newValue.equalsIgnoreCase("junior")|| newValue.equalsIgnoreCase("senior")))
 		{
 			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 		
 			
 		}
-		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !(newValue.equalsIgnoreCase("terminated")&& newValue.equalsIgnoreCase("active")))
+		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !(newValue.equalsIgnoreCase("terminated")|| newValue.equalsIgnoreCase("active")))
 		{
 			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
@@ -318,7 +319,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		        }
 			}
 			if(practitionerUpdate instanceof DoctorRecord)
-				logger.info("Doctor Record updated :\nRecordID \"" +  practitionerUpdate.getRecordID() +  "\", FirstName \"" +  practitionerUpdate.getFirstName() + 
+				logger.info("!!!Doctor Record updated :\nRecordID \"" +  practitionerUpdate.getRecordID() +  "\", FirstName \"" +  practitionerUpdate.getFirstName() + 
 						"\", LastName \"" +  practitionerUpdate.getLastName() +  "\", Address \"" +  ((DoctorRecord)practitionerUpdate).getAddress() +  "\", Phone \"" + ((DoctorRecord)practitionerUpdate).getPhone() + "\", Specialization \"" + 
 						((DoctorRecord)practitionerUpdate).getSpecialization() + "\", Location \""+((DoctorRecord)practitionerUpdate).getLocation()+"\"");
 			if(practitionerUpdate instanceof NurseRecord)
@@ -330,7 +331,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		
 		else
 		{
-			logger.info(" could not update nurse record with record ID: "+recordID+"Invalid field name: "+fieldName);
+			logger.info(" could not update record with record ID: "+recordID+"Invalid field name: "+fieldName);
 		}
 		
 		return isSucess;
@@ -339,13 +340,31 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	
 	public static void loadData(ClinicServer server) throws RemoteException
 	{
+		if(server.clinicName.equals("MTL"))
+		{
 		server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "mtl");
-		server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
-		server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
+		server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "mtl");
+		server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "mtl");
+		}
+		else if (server.clinicName.equals("LVL"))
+		{
+			
+			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "lvl");
+			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
+			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "lvl");
+		}
 		
-		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("2016-05-20"));
-		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("2014-05-24"));
-		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("2016-05-21"));	
+		else
+		{
+			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "ddo");
+			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
+			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
+		}
+		
+		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
+		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("24-05-2015"));
+		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));	
+		
 		
 		
 	}
