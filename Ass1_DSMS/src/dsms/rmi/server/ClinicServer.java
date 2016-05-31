@@ -370,8 +370,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
 
 		ClinicServer MTLServer = new ClinicServer("MTL",6001);
-		ClinicServer LVLServer = new ClinicServer("LVL",6005);
-		ClinicServer DDOServer = new ClinicServer("DDO",6010);
+		ClinicServer LVLServer = new ClinicServer("LVL",6002);
+		ClinicServer DDOServer = new ClinicServer("DDO",6003);
 
 		Remote objremote1 = UnicastRemoteObject.exportObject(MTLServer,defaultRegistryPort);
 		rmiRegistry.bind("MTL", objremote1);
