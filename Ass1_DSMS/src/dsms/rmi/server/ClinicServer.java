@@ -1,10 +1,7 @@
 package dsms.rmi.server;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -22,20 +19,17 @@ import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import dsms.rmi.intermediate.ManagerInterface;
 import dsms.rmi.objects.DoctorRecord;
 import dsms.rmi.objects.NurseRecord;
 import dsms.rmi.objects.Practitioner;
 
-
 /**
  * Server acts as a thread object and performs different operation requested by client
  *
  */
-public class ClinicServer extends Thread implements ManagerInterface {
-
-	
+public class ClinicServer extends Thread implements ManagerInterface 
+{
 	private HashMap<Character, ArrayList<Practitioner>> practitionerRecords = 
 			new HashMap<Character, ArrayList<Practitioner>>();
 	private String clinicName;
@@ -44,13 +38,15 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	private Logger logger;
 	static int drRecord=10000;
 	static int nrRecord=10000;
-	public ClinicServer()
-	{
-		
-	}
 	
 	/**
-	 * @param clinicName for which log file need to be generated
+	 * default ctor
+	 */
+	public ClinicServer()
+	{}
+	
+	/**
+	 * @param create clinic with clinicName
 	 */
 	public ClinicServer(String clinicName) 
 	{
@@ -58,19 +54,20 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-
 	/**
-	 * @param clinicName for which log file need to be generated
-	 * @param portNumber UDP port for current server 
+	 * @param create clinic with clinicName
+	 * @param portNumber UDP port for current clinic 
 	 */
-	public ClinicServer(String clinicName, int portNumber)  {
-
-		// TODO Auto-generated constructor stub
+	public ClinicServer(String clinicName, int portNumber)  
+	{
 		this.clinicName = clinicName;
 		UDPPort = portNumber;
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
+	/**
+	 * @param clinicName for which seperate log file created
+	 */
 	private void setLogger(String clinicName) 
 	{
 		try
@@ -87,13 +84,15 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		}
 	}
 
+	/**
+	 * @return current server's UDP port
+	 */
 	public int getUDPPort()
 	{
 		return this.UDPPort;
 	}
 	
-	/* Automatically gets called be respective thread order wholly determined by jvm
-	 * 
+	/* Automatically called by jvm for current thread instance
 	 * (non-Javadoc)
 	 * @see java.lang.Thread#run()
 	 */
@@ -105,7 +104,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		{
 			socket = new DatagramSocket(this.UDPPort);
 			byte[] message = new byte[1000];
-			//Logger call
 
 			while(true)
 			{
@@ -127,10 +125,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		}
 	}
 	
-
-
 	/* 
-	 * created Doctor Record
+	 * create new Doctor Record
 	 * (non-Javadoc)
 	 * @see dsms.rmi.intermediate.ManagerInterface#createDRecord(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
@@ -141,6 +137,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		++drRecord;
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
+		//use of synchronized block here lock is achieved on each record inside list using fine grain locking
 		synchronized(practitionerRecords) 
 		{
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
@@ -164,12 +161,11 @@ public class ClinicServer extends Thread implements ManagerInterface {
 					specialization + "\", Location \""+location+"\"");
 			
 			return true;
-
 		}	
 	}
 	
 	/* 
-	 * creates Nurse Record
+	 * create new Nurse Record
 	 * (non-Javadoc)
 	 * @see dsms.rmi.intermediate.ManagerInterface#createNRecord(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Date)
 	 */
@@ -177,10 +173,10 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	public boolean createNRecord(String firstName, String lastName, String designation, String status, Date statusDate)
 			throws RemoteException 
 	{
-
 		++nrRecord;
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
+		//use of synchronized block here lock is achieved on each record inside list using fine grain locking
 		synchronized(practitionerRecords) 
 		{
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
@@ -189,12 +185,12 @@ public class ClinicServer extends Thread implements ManagerInterface {
 				practitionerList = new ArrayList<Practitioner>();
 				practitionerList.add(Practitioner);
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
-			//	logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
+			
 			}
 			else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
 			{
 			practitionerList.add(Practitioner);
-			//logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
+			
 			}
 			else
 			{
@@ -227,12 +223,10 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			isUnique=false;
 			break;
 		}
-		
 		return isUnique;
 	}
 
-	/* This method runs on UDP implementation here server acts as a cleint
-	 * 
+	/* This method runs on UDP implementation here server acts as a client
 	 * (non-Javadoc)
 	 * @see dsms.rmi.intermediate.ManagerInterface#getRecordCounts(java.lang.String)
 	 */
@@ -273,14 +267,14 @@ public class ClinicServer extends Thread implements ManagerInterface {
 					}
 				}
 			}
-			logger.info("Successfully fetched record counts from all servers using UDP as: "+response);		
+		logger.info("Successfully fetched record counts from all servers using UDP as: "+response);		
 		return response;	 
 	}
 	
 	/**
 	 * gets record count from current server
-	 * @param recordType
-	 * @return
+	 * @param recordType "DR" for Doctor Record "NR" for Nurse Record
+	 * @return count of records
 	 */
 	private String getRecordsFromServer(String recordType)
 	{
@@ -311,30 +305,26 @@ public class ClinicServer extends Thread implements ManagerInterface {
 
 	/* Edit record with recordID checks if fieldName is invalid or not.
 	 * The fields that should be allowed to change are address, phone and location (for
-	 *	DoctorRecord), and designation, status and status date (for NurseRecord).
+	 * DoctorRecord), and designation, status and status date (for NurseRecord).
 	 * (non-Javadoc)
 	 * @see dsms.rmi.intermediate.ManagerInterface#editRecord(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException {
+	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException 
+	{
 	
 		boolean isSucess=false;
 		if(recordID.startsWith("DR")&&fieldName.equalsIgnoreCase("location") && !(newValue.equalsIgnoreCase("mtl")||newValue.equalsIgnoreCase("lvl")||newValue.equalsIgnoreCase("ddo")))
 		{
 			logger.info(" could not update doctor record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);			
-			
 		}
 		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !(newValue.equalsIgnoreCase("junior")|| newValue.equalsIgnoreCase("senior")))
 		{
 			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
-		
-			
 		}
 		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !(newValue.equalsIgnoreCase("terminated")|| newValue.equalsIgnoreCase("active")))
 		{
 			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
-			
-			
 		}
 		else if(fieldName.equalsIgnoreCase("address")||fieldName.equalsIgnoreCase("phone")||fieldName.equalsIgnoreCase("location")||
 				fieldName.equalsIgnoreCase("designation")||fieldName.equalsIgnoreCase("status")||fieldName.equalsIgnoreCase("statusDate"))
@@ -342,7 +332,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			Practitioner practitionerUpdate=null;
 			synchronized(practitionerRecords) 
 			{
-				
 				boolean recordFound=false;
 			    for (Map.Entry<Character, ArrayList<Practitioner>> entry : practitionerRecords.entrySet())
 		        {
@@ -357,7 +346,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			    				if(fieldName.equalsIgnoreCase("address")){((DoctorRecord)practitioner).setAddress(newValue); recordFound=true; break;}
 			    				if(fieldName.equalsIgnoreCase("phone")){((DoctorRecord)practitioner).setPhone(newValue);recordFound=true; break;}
 			    				if(fieldName.equalsIgnoreCase("location")){((DoctorRecord)practitioner).setLocation(newValue);recordFound=true; break;}
-
 			    			}
 			    		}
 			    		else if(recordID.startsWith("NR")&& practitioner instanceof NurseRecord)
@@ -370,7 +358,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			    				if(fieldName.equalsIgnoreCase("statusDate")){((NurseRecord)practitioner).setStatusDate(getFormattedDate(newValue));recordFound=true; break;}
 			    			}
 			    		}
-			    		
 			    	}
 			    	if(recordFound) break;
 		        }
@@ -385,29 +372,29 @@ public class ClinicServer extends Thread implements ManagerInterface {
 						((NurseRecord)practitionerUpdate).getStatusDate()+ "\"" );	
 			isSucess=true;
 		}
-		
 		else
 		{
 			logger.info(" could not update record with record ID: "+recordID+"Invalid field name: "+fieldName);
 		}
-		
 		return isSucess;
 	}
 	
 	
 	/**
-	 * Initializes database for each server
+	 * Initializes database for each server with dummy records
 	 * @param server
 	 * @throws RemoteException
 	 */
 	public static void loadData(ClinicServer server) throws RemoteException
 	{
+		//load database for Montreal server
 		if(server.clinicName.equals("MTL"))
 		{
 		server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "mtl");
 		server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "mtl");
 		server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "mtl");
 		}
+		//load database for Laval server
 		else if (server.clinicName.equals("LVL"))
 		{
 			
@@ -415,20 +402,22 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
 			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "lvl");
 		}
-		
+		//load database for Dollard server
 		else
 		{
 			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "ddo");
 			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
 			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
 		}
-		
 		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
 		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("24-05-2015"));
 		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
-		
 	}
 	
+	/**
+	 * @param dateStr
+	 * @return Date in "dd-MM-yyyy" format
+	 */
 	public static Date getFormattedDate(String dateStr)
 	{
 		Date formattedDate=null;
@@ -439,22 +428,19 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		} 
 		catch (ParseException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return formattedDate;
 	}
 	
-	
 	/**
-	 * execution of thread 
+	 * execution of thread starts here.thread for all 3 servers being created 
 	 * @param args
 	 * @throws RemoteException
 	 * @throws AlreadyBoundException
 	 */
-	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
-
-		
+	public static void main(String[] args) throws RemoteException, AlreadyBoundException 
+	{
 		int defaultRegistryPort = 1099;
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
 
@@ -464,10 +450,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		
 		Remote objremote1 = UnicastRemoteObject.exportObject(MTLServer,defaultRegistryPort);
 		rmiRegistry.bind("MTL", objremote1);
-
 		Remote objremote2 = UnicastRemoteObject.exportObject(LVLServer,defaultRegistryPort);
 		rmiRegistry.bind("LVL", objremote2);
-
 		Remote objremote3 = UnicastRemoteObject.exportObject(DDOServer,defaultRegistryPort);
 		rmiRegistry.bind("DDO", objremote3);
 
@@ -488,5 +472,4 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		clinicServers.add(DDOServer);
 
 	}
-
 }
