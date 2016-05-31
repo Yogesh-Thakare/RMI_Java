@@ -12,22 +12,25 @@ import dsms.rmi.intermediate.ManagerInterface;
 
 /**
  * Tests for multiple thread concurrent access
- * @author yogth
- *
  */
-public class DSMSConcurrencyTest {
+public class DSMSConcurrencyTest 
+{
 	private static ManagerClient client1 ;
 	private static ManagerClient client2 ;
 	private static ManagerClient client3 ;
 	private static ManagerClient client4 ;
 	private static ManagerClient client5 ;
 	private static ManagerClient client6 ;
-	
+
 	ManagerInterface serverAccess;
-	
+
+	/**
+	 * Setup Before class
+	 * @throws Exception
+	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		
+	public static void setUpBeforeClass() throws Exception 
+	{
 		List<ManagerClient> testClients=ManagerClient.getClients();
 
 		client1 = testClients.get(0);
@@ -36,7 +39,7 @@ public class DSMSConcurrencyTest {
 		client4 = testClients.get(0);
 		client5 = testClients.get(0);
 		client6 = testClients.get(0);
-		
+
 		client1.InitializeServer("MTL");
 		client2.InitializeServer("MTL");
 		client3.InitializeServer("MTL");
@@ -44,36 +47,37 @@ public class DSMSConcurrencyTest {
 		client5.InitializeServer("MTL");
 		client6.InitializeServer("MTL");
 	}
-	
+
+	/**
+	 * Test server access method
+	 * @throws Exception
+	 */
 	@Test
-	public void testServerAccess() throws Exception {
-
-		try {
+	public void testServerAccess() throws Exception 
+	{
+		try 
+		{
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
-			
+
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
-			
+
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
-			
+
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
-			
+
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
-			
+
 			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
-			
-			
-			
-			
-
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 	}
-
 }
