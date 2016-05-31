@@ -32,6 +32,10 @@ public class ManagerClient extends Thread
 			DDO = "Dollard-des-Ormeaux";
 	protected static String ManagerID;
 
+	/**
+	 * This is a constructor to create a log file
+	 * @param string
+	 */
 	public ManagerClient(String string) 
 	{
 		this.setName(string);
@@ -40,8 +44,9 @@ public class ManagerClient extends Thread
 		System.setSecurityManager(new RMISecurityManager());
 		this.start();
 	}
-	
+
 	/**
+	 * Returns different clients
 	 * @return clients as a objects of thread
 	 */
 	public static List<ManagerClient> getClients()
@@ -51,20 +56,25 @@ public class ManagerClient extends Thread
 		ManagerClient managerMTL = new ManagerClient("MTLManager");
 		ManagerClient managerLVL = new ManagerClient("LVLManager");
 		ManagerClient managerDDO = new ManagerClient("DDOManager");
-		
+
 		testClients.add(managerMTL);
 		testClients.add(managerLVL);
 		testClients.add(managerDDO);
-		
+
 		return testClients;	
 	}
-	
+
+	/**
+	 * This method returns the server name on the basis of ManagerID entered by user
+	 * @param manager
+	 * @return
+	 */
 	public ManagerInterface ServerAccess(String manager) 
 	{
 		ManagerInterface server = null;
-				String locationName = manager.substring(0, 3);
-				System.out.println(locationName);
-				server = LocateServer(locationName);
+		String locationName = manager.substring(0, 3);
+		System.out.println(locationName);
+		server = LocateServer(locationName);
 		return server;
 	}
 
@@ -78,8 +88,8 @@ public class ManagerClient extends Thread
 		System.setSecurityManager(new RMISecurityManager());
 		if (server.equals("MTL"))
 		{
-		MTLServer = (ManagerInterface) Naming
-				.lookup("rmi://localhost:1099/MTL");
+			MTLServer = (ManagerInterface) Naming
+					.lookup("rmi://localhost:1099/MTL");
 		}
 		if (server.equals("LVL"))
 		{
@@ -130,8 +140,14 @@ public class ManagerClient extends Thread
 		return server;
 	}
 
-	// Get Server Connection
-	public static ManagerInterface LocateServer(String locationName) {
+
+	/**
+	 * Get server connection
+	 * @param locationName
+	 * @return
+	 */
+	public static ManagerInterface LocateServer(String locationName) 
+	{
 		if (locationName.equals("MTL")) {
 			return MTLServer;
 		} else if (locationName.equals("LVL")) {
@@ -142,6 +158,9 @@ public class ManagerClient extends Thread
 		return null;
 	}
 
+	/**
+	 * Menu which will display on the console
+	 */
 	public static void showMenu() {
 		System.out.println("Distributed Staff Management System \n");
 		System.out.println("Please select an option");
@@ -151,7 +170,12 @@ public class ManagerClient extends Thread
 		System.out.println("4. Edit record");
 		System.out.println("5. Exit");
 	}
-	
+
+	/**
+	 * Method to validate input string 
+	 * @param keyboard
+	 * @return
+	 */
 	public static String InputStringValidation(Scanner keyboard) {
 		Boolean valid = false;
 		String userInput = "";
@@ -170,7 +194,12 @@ public class ManagerClient extends Thread
 		}
 		return userInput;
 	}
-	
+
+	/**
+	 * This method will return the formatted date from string
+	 * @param dateStr
+	 * @return
+	 */
 	public static Date getFormattedDate(String dateStr)
 	{
 		Date formattedDate=null;
@@ -189,17 +218,17 @@ public class ManagerClient extends Thread
 
 	public static void main(String[] args)
 	{
-			try
-			{
+		try
+		{
 			System.setProperty("java.security.policy","file:./security.policy");
 			runTerminal();	
-			}
-			catch(Exception e)
-			{
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
-			}		
-}
-	
+		}		
+	}
+
 	/**
 	 * runs console to accept input from manager
 	 * 
@@ -209,14 +238,14 @@ public class ManagerClient extends Thread
 		try
 		{
 			ManagerClient objClient = new ManagerClient("ClientManager1");
+
 			//initialize the connections to registry
 			objClient.InitializeServer("MTL");
 			objClient.InitializeServer("LVL");
 			objClient.InitializeServer("DDO");
+
 			ManagerInterface objServer = null;
 			Scanner keyboard = new Scanner(System.in);
-			//to which server you want to connect
-			//objServer = objClient.ServerValidation(keyboard);
 			Boolean valid = false;
 			ManagerInterface server = null;
 			System.out.println("Enter Manager ID");
@@ -245,13 +274,13 @@ public class ManagerClient extends Thread
 					keyboard.nextLine();
 				}
 			}
-		
+
 			Integer userInput = 0;
 			showMenu();
 			userInput = Integer.parseInt(InputStringValidation(keyboard));
 			String firstName, lastName,address,phone,specialization,location;
 			String designation,status,statusdate,recordType,recordID,fieldName,newValue;
-	
+
 			while(true)
 			{
 				switch(userInput)
@@ -274,8 +303,8 @@ public class ManagerClient extends Thread
 					resultDRecord = objServer.createDRecord (firstName,lastName,address,phone,specialization,location);
 					if(resultDRecord)
 					{
-					System.out.println("Doctor  Record Created Successfully by " + ManagerID);
-					ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
+						System.out.println("Doctor  Record Created Successfully by " + ManagerID);
+						ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
 					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
@@ -293,26 +322,26 @@ public class ManagerClient extends Thread
 					Scanner scanner = new Scanner(System.in);
 					System.out.println("Status Date(yyyy-MM-dd): ");
 					statusdate = scanner.next();
-					
+
 					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 					Date date2=null;
 					try 
 					{
-					    //Parsing the String
-					    date2 = dateFormat.parse(statusdate);
+						//Parsing the String
+						date2 = dateFormat.parse(statusdate);
 					} 
 					catch (ParseException e) 
 					{
-					    // TODO Auto-generated catch block
-					    e.printStackTrace();
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-	
+
 					boolean resultNRecord;
 					resultNRecord = objServer.createNRecord (firstName,lastName,designation,status,date2);
 					if(resultNRecord)
 					{
-					System.out.println("Nurse Record Created Successfully by" + ManagerID);
-					ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
+						System.out.println("Nurse Record Created Successfully by" + ManagerID);
+						ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
 					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
@@ -335,13 +364,13 @@ public class ManagerClient extends Thread
 					fieldName = InputStringValidation(keyboard);
 					System.out.println("New Value: ");
 					newValue = InputStringValidation(keyboard);
-					
+
 					boolean editRecordResult;
 					editRecordResult=objServer.editRecord(recordID,fieldName,newValue);
 					if(editRecordResult)
 					{
-					System.out.println("Edit Record successfully by " + ManagerID);
-					ManagerClient.log.info("Edit Record successfully by " + ManagerID);
+						System.out.println("Edit Record successfully by " + ManagerID);
+						ManagerClient.log.info("Edit Record successfully by " + ManagerID);
 					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
@@ -356,28 +385,30 @@ public class ManagerClient extends Thread
 					ManagerClient.log.info("Invalid Input entered by user");
 				}
 			}
-			
+
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
-		
+
 	/**
 	 * creates log file for each manager who gets in to system
-	 * 
 	 */
 	public void createLog()
 	{
-		try {
+		try 
+		{
 			log = Logger.getLogger(this.getName());
 			FileHandler fileHandler = new FileHandler(this.getName() + ".log");
 			log.addHandler(fileHandler);
-	        SimpleFormatter formatter = new SimpleFormatter();  
-	        fileHandler.setFormatter(formatter);
-	        log.info("Log file created for ManagerClient " + this.getName() );
-		} catch (SecurityException | IOException e) {
+			SimpleFormatter formatter = new SimpleFormatter();  
+			fileHandler.setFormatter(formatter);
+			log.info("Log file created for ManagerClient " + this.getName() );
+		} 
+		catch (SecurityException | IOException e) 
+		{
 			log.info("Log File Error: " + e.getMessage());
 		}
 	}
