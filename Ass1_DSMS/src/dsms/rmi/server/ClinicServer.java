@@ -1,7 +1,10 @@
 package dsms.rmi.server;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -37,15 +40,16 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	static int nrRecord=10000;
 	public ClinicServer()
 	{
+		
 	}
 	
-	public ClinicServer(String clinicName)
+	public ClinicServer(String clinicName) 
 	{
 		this.clinicName = clinicName;
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-	public ClinicServer(String clinicName, int portNumber) {
+	public ClinicServer(String clinicName, int portNumber)  {
 		// TODO Auto-generated constructor stub
 		this.clinicName = clinicName;
 		UDPPort = portNumber;
@@ -99,6 +103,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			socket.close();
 		}
 	}
+	
+
 
 	@Override
 	public boolean createDRecord(String firstName, String lastName, String address, String phone, String specialization,
@@ -193,7 +199,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 
 	@Override
 	public String getRecordCounts(String recordType) throws RemoteException {
-		String response = null;
+	String response = null;
 		
 			response += getRecordsFromServer(recordType);
 			for(ClinicServer Server : clinicServers)
@@ -231,6 +237,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			logger.info("Successfully fetched record counts from all servers using UDP as: "+response);
 			
 		return response;
+		
+		 
 	}
 	
 	private String getRecordsFromServer(String recordType)
@@ -259,6 +267,9 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		recordString.append(recordCount);
 		return recordString.toString();
 	}
+
+	
+	
 
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException {
@@ -301,6 +312,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			    				if(fieldName.equalsIgnoreCase("address")){((DoctorRecord)practitioner).setAddress(newValue); recordFound=true; break;}
 			    				if(fieldName.equalsIgnoreCase("phone")){((DoctorRecord)practitioner).setPhone(newValue);recordFound=true; break;}
 			    				if(fieldName.equalsIgnoreCase("location")){((DoctorRecord)practitioner).setLocation(newValue);recordFound=true; break;}
+
 			    			}
 			    		}
 			    		else if(recordID.startsWith("NR")&& practitioner instanceof NurseRecord)
@@ -391,7 +403,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		ClinicServer MTLServer = new ClinicServer("MTL",6001);
 		ClinicServer LVLServer = new ClinicServer("LVL",6002);
 		ClinicServer DDOServer = new ClinicServer("DDO",6003);
-
+		
 		Remote objremote1 = UnicastRemoteObject.exportObject(MTLServer,defaultRegistryPort);
 		rmiRegistry.bind("MTL", objremote1);
 
