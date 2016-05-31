@@ -10,6 +10,11 @@ import org.junit.Test;
 import dsms.rmi.client.ManagerClient;
 import dsms.rmi.intermediate.ManagerInterface;
 
+/**
+ * Tests for multiple thread concurrent access
+ * @author yogth
+ *
+ */
 public class DSMSConcurrencyTest {
 	private static ManagerClient client1 ;
 	private static ManagerClient client2 ;
@@ -44,22 +49,22 @@ public class DSMSConcurrencyTest {
 	public void testServerAccess() throws Exception {
 
 		try {
-			serverAccess = client1.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
 			
-			serverAccess = client2.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
 			
-			serverAccess = client3.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
 			
-			serverAccess = client4.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
 			
-			serverAccess = client5.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
 			
-			serverAccess = client6.LocateServer("MTL");
+			serverAccess = ManagerClient.LocateServer("MTL");
 			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
 			
 			
