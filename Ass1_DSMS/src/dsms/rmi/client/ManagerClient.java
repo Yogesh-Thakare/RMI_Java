@@ -7,7 +7,9 @@ import java.rmi.RMISecurityManager;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -33,6 +35,23 @@ public class ManagerClient extends Thread{
 		System.setSecurityManager(new RMISecurityManager());
 		this.start();
 	}
+	
+	public static List<ManagerClient> getClients()
+	{
+		System.setProperty("java.security.policy","file:./security.policy");
+		List<ManagerClient> testClients=new ArrayList<ManagerClient>();
+		ManagerClient manager1 = new ManagerClient("ClientManager1");
+		ManagerClient manager2 = new ManagerClient("ClientManager2");
+		ManagerClient manager3 = new ManagerClient("ClientManager3");
+		
+		testClients.add(manager1);
+		testClients.add(manager2);
+		testClients.add(manager3);
+		
+		return testClients;
+		
+	}
+
 
 	public void InitializeServer(String server) throws Exception {
 		System.setSecurityManager(new RMISecurityManager());
@@ -161,7 +180,7 @@ public class ManagerClient extends Thread{
 			boolean resultDRecord1,resultNRecord1,editRecord1;
 			String count1;
 			resultDRecord1 = objServer1.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "mtl");
-			resultNRecord1= objServer1.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("2016-05-20"));
+			resultNRecord1= objServer1.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
 			count1=objServer1.getRecordCounts("DR");
 			editRecord1=objServer1.editRecord("DR10001","adoctor","zdoctor");
 			
@@ -171,7 +190,7 @@ public class ManagerClient extends Thread{
 			boolean resultDRecord2,resultNRecord2,editRecord2;
 			String count2;
 			resultDRecord2= objServer2.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
-			resultNRecord2= objServer2.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("2016-07-20"));
+			resultNRecord2= objServer2.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("20-07-2016"));
 			count2= objServer2.getRecordCounts("NR");
 			editRecord2= objServer2.editRecord("DR10001","bdoctor","ydoctor");
 			
@@ -181,7 +200,7 @@ public class ManagerClient extends Thread{
 			boolean resultDRecord3,resultNRecord3,editRecord3;
 			String count3;
 			resultDRecord3=objServer3.createDRecord("cdoctor", "cdoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
-			resultNRecord3=objServer3.createNRecord("cnurse", "cnurse", "junior", "active",getFormattedDate("2016-08-20"));
+			resultNRecord3=objServer3.createNRecord("cnurse", "cnurse", "junior", "active",getFormattedDate("20-08-2016"));
 			count3=objServer3.getRecordCounts("DR");
 			editRecord3=objServer3.editRecord("DR10001","cdoctor","edoctor");
 			
