@@ -310,8 +310,10 @@ public class ManagerClient extends Thread
 					boolean editRecordResult;
 					editRecordResult=objServer.editRecord(recordID,fieldName,newValue);
 					if(editRecordResult)
+					{
 					System.out.println("Edit Record successfully by " + ManagerID);
 					ManagerClient.log.info("Edit Record successfully by " + ManagerID);
+					}
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
