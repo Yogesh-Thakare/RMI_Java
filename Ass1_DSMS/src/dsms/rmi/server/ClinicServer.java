@@ -28,8 +28,13 @@ import dsms.rmi.objects.DoctorRecord;
 import dsms.rmi.objects.NurseRecord;
 import dsms.rmi.objects.Practitioner;
 
-public class ClinicServer extends Thread implements ManagerInterface 
-{
+
+/**
+ * Server acts as a thread object and performs different operation requested by client
+ *
+ */
+public class ClinicServer extends Thread implements ManagerInterface {
+
 	
 	private HashMap<Character, ArrayList<Practitioner>> practitionerRecords = 
 			new HashMap<Character, ArrayList<Practitioner>>();
@@ -44,14 +49,22 @@ public class ClinicServer extends Thread implements ManagerInterface
 		
 	}
 	
+	/**
+	 * @param clinicName for which log file need to be generated
+	 */
 	public ClinicServer(String clinicName) 
 	{
 		this.clinicName = clinicName;
 		this.setLogger("logs/clinic/"+clinicName+".txt");
 	}
 	
-	public ClinicServer(String clinicName, int portNumber)  
-	{
+
+	/**
+	 * @param clinicName for which log file need to be generated
+	 * @param portNumber UDP port for current server 
+	 */
+	public ClinicServer(String clinicName, int portNumber)  {
+
 		// TODO Auto-generated constructor stub
 		this.clinicName = clinicName;
 		UDPPort = portNumber;
@@ -79,6 +92,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 		return this.UDPPort;
 	}
 	
+	/* Automatically gets called be respective thread order wholly determined by jvm
+	 * 
+	 * (non-Javadoc)
+	 * @see java.lang.Thread#run()
+	 */
 	public void run()
 	{
 		DatagramSocket socket = null;
@@ -111,6 +129,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 	
 
 
+	/* 
+	 * created Doctor Record
+	 * (non-Javadoc)
+	 * @see dsms.rmi.intermediate.ManagerInterface#createDRecord(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
 	public boolean createDRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) throws RemoteException 
@@ -145,6 +168,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 		}	
 	}
 	
+	/* 
+	 * creates Nurse Record
+	 * (non-Javadoc)
+	 * @see dsms.rmi.intermediate.ManagerInterface#createNRecord(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Date)
+	 */
 	@Override
 	public boolean createNRecord(String firstName, String lastName, String designation, String status, Date statusDate)
 			throws RemoteException 
@@ -180,6 +208,14 @@ public class ClinicServer extends Thread implements ManagerInterface
 		}	
 	}
 	
+	/**
+	 * checks if record already present with given recordID
+	 * @param recordID
+	 * @param fName
+	 * @param lName
+	 * @param chactr
+	 * @return true or false
+	 */
 	public boolean checkUniqueRecord( String recordID,String fName,String lName,Character chactr)
 	{
 		boolean isUnique=true;
@@ -195,6 +231,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 		return isUnique;
 	}
 
+	/* This method runs on UDP implementation here server acts as a cleint
+	 * 
+	 * (non-Javadoc)
+	 * @see dsms.rmi.intermediate.ManagerInterface#getRecordCounts(java.lang.String)
+	 */
 	@Override
 	public String getRecordCounts(String recordType) throws RemoteException 
 	{
@@ -236,6 +277,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 		return response;	 
 	}
 	
+	/**
+	 * gets record count from current server
+	 * @param recordType
+	 * @return
+	 */
 	private String getRecordsFromServer(String recordType)
 	{
 		int recordCount=0;
@@ -263,6 +309,12 @@ public class ClinicServer extends Thread implements ManagerInterface
 		return recordString.toString();
 	}
 
+	/* Edit record with recordID checks if fieldName is invalid or not.
+	 * The fields that should be allowed to change are address, phone and location (for
+	 *	DoctorRecord), and designation, status and status date (for NurseRecord).
+	 * (non-Javadoc)
+	 * @see dsms.rmi.intermediate.ManagerInterface#editRecord(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException {
 	
@@ -343,6 +395,11 @@ public class ClinicServer extends Thread implements ManagerInterface
 	}
 	
 	
+	/**
+	 * Initializes database for each server
+	 * @param server
+	 * @throws RemoteException
+	 */
 	public static void loadData(ClinicServer server) throws RemoteException
 	{
 		if(server.clinicName.equals("MTL"))
@@ -388,8 +445,15 @@ public class ClinicServer extends Thread implements ManagerInterface
 		return formattedDate;
 	}
 	
-	public static void main(String[] args) throws RemoteException, AlreadyBoundException 
-	{
+	
+	/**
+	 * execution of thread 
+	 * @param args
+	 * @throws RemoteException
+	 * @throws AlreadyBoundException
+	 */
+	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
+
 		
 		int defaultRegistryPort = 1099;
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
