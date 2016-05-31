@@ -1,5 +1,4 @@
 package dsms.rmi.server;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -77,7 +76,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		try
 		{
 			socket = new DatagramSocket(this.UDPPort);
-			byte[] message = new byte[10000];
+			byte[] message = new byte[1000];
 			//Logger call
 
 			while(true)
@@ -100,32 +99,39 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		}
 	}
 
-
 	@Override
 	public boolean createDRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) throws RemoteException {
-		drRecord++;
+		++drRecord;
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
 		synchronized(practitionerRecords) {
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
-			if(practitionerList == null) {
+			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
+			{
 				practitionerList = new ArrayList<Practitioner>();
+				practitionerList.add(Practitioner);
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
 			}
-			else if(checkUniqueRecord(Practitioner.getRecordID(),lastName.charAt(0)))
+			else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
 			{
 			practitionerList.add(Practitioner);
 			}
 			else
 			{
 				logger.info("Failed to add Doctor Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+				return false;
 			}
 			
-			logger.info("New Doctor Record added to the clinic with record ID : "+Practitioner.getRecordID());
+
+			logger.info("Doctor Record created :\nRecordID \"" +  "DR"+drRecord +  "\", FirstName \"" +  firstName + 
+					"\", LastName \"" +  lastName +  "\", Address \"" +  address +  "\", Phone \"" + phone + "\", Specialization \"" + 
+					specialization + "\", Location \""+location+"\"");
+			
+			return true;
 
 		}
-		return true;
+		
 	}
 	
 
@@ -136,38 +142,47 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	public boolean createNRecord(String firstName, String lastName, String designation, String status, Date statusDate)
 			throws RemoteException {
 
-		nrRecord++;
+		++nrRecord;
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
 		synchronized(practitionerRecords) {
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
-			if(practitionerList == null) {
+			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0))) {
 				practitionerList = new ArrayList<Practitioner>();
+				practitionerList.add(Practitioner);
 				practitionerRecords.put(lastName.charAt(0), practitionerList);
+			//	logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
 			}
-			else if(checkUniqueRecord(Practitioner.getRecordID(),lastName.charAt(0)))
+			else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
 			{
 			practitionerList.add(Practitioner);
+			//logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
 			}
 			else
 			{
 				logger.info("Failed to add Nurse Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+				return false;
 			}
 				
-			logger.info("New Nurse Record added to the clinic with record ID : "+Practitioner.getRecordID());
+
+			logger.info("Nurse Record created :\nRecordID \"" +  "NR"+nrRecord +  "\", FirstName \"" +  firstName + 
+					"\", LastName \"" +  lastName +  "\", Designation \"" +  designation +  "\", status \"" + status + "\", StatusDate \"" + 
+					statusDate+ "\"" );
+			return true;
 
 		}
-		return true;
+		
 		
 	}
 	
-	public boolean checkUniqueRecord( String recordID,Character chactr)
+	public boolean checkUniqueRecord( String recordID,String fName,String lName,Character chactr)
 	{
 		boolean isUnique=true;
 		
+		if(!practitionerRecords.isEmpty()&&practitionerRecords.get(chactr)!=null)
 		for(Practitioner practitioner:practitionerRecords.get(chactr))
 		{
-			practitioner.getRecordID().equals(recordID);
+			if(practitioner.getRecordID().equals(recordID) && practitioner.getFirstName().equals(fName)&& practitioner.getLastName().equals(lName))
 			isUnique=false;
 			break;
 		}
@@ -195,8 +210,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 							int port = Server.getUDPPort();
 							DatagramPacket request = new DatagramPacket(message, (recordType).length(),host,port);
 							socket.send(request);
-
-							byte[] buffer = new byte[10000];
+							byte[] buffer = new byte[100];
 							DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 							socket.receive(reply);
 							response+=new String(reply.getData());
@@ -223,7 +237,6 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		int recordCount=0;
 		StringBuilder recordString = new StringBuilder();
 		recordString.append(clinicName+" ");
-		// TODO Auto-generated method stub
 		Iterator<?> it = practitionerRecords.entrySet().iterator();
 		while(it.hasNext())
 		{
@@ -243,64 +256,84 @@ public class ClinicServer extends Thread implements ManagerInterface {
 			}
 		}
 		recordString.append(recordCount);
-		recordString.append("\n");
 		return recordString.toString();
 	}
 
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) throws RemoteException {
 	
+		boolean isSucess=false;
+		if(recordID.startsWith("DR")&&fieldName.equalsIgnoreCase("location") && !(newValue.equalsIgnoreCase("mtl")||newValue.equalsIgnoreCase("lvl")||newValue.equalsIgnoreCase("ddo")))
+		{
+			logger.info(" could not update doctor record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);			
+			
+		}
+		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !(newValue.equalsIgnoreCase("junior")&& newValue.equalsIgnoreCase("senior")))
+		{
+			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 		
-		if(recordID.startsWith("DR")&&fieldName.equalsIgnoreCase("location") && !newValue.equalsIgnoreCase("mtl")||!newValue.equalsIgnoreCase("lvl")||!newValue.equalsIgnoreCase("ddo"))
-		{
-			logger.info(" could not update doctor record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
 		}
-		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("designation") && !newValue.equalsIgnoreCase("junior")&& !newValue.equalsIgnoreCase("senior"))
+		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !(newValue.equalsIgnoreCase("terminated")&& newValue.equalsIgnoreCase("active")))
 		{
 			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
-		}
-		else if(recordID.startsWith("NR")&& fieldName.equalsIgnoreCase("status") && !newValue.equalsIgnoreCase("terminated")&& !newValue.equalsIgnoreCase("active"))
-		{
-			logger.info(" could not update nurse record with record ID: "+recordID+" Because of Invalid data for field name: "+fieldName);
 			
 		}
-		else if(fieldName.equals("address")||fieldName.equals("phone")||fieldName.equals("location")||
-				fieldName.equals("designation")||fieldName.equals("status")||fieldName.equals("statusDate"))
+		else if(fieldName.equalsIgnoreCase("address")||fieldName.equalsIgnoreCase("phone")||fieldName.equalsIgnoreCase("location")||
+				fieldName.equalsIgnoreCase("designation")||fieldName.equalsIgnoreCase("status")||fieldName.equalsIgnoreCase("statusDate"))
 		{
+			Practitioner practitionerUpdate=null;
 			synchronized(practitionerRecords) {
 				
+				boolean recordFound=false;
 			    for (Map.Entry<Character, ArrayList<Practitioner>> entry : practitionerRecords.entrySet())
 		        {
 			    	ArrayList<Practitioner> practitionerList = entry.getValue();
 			    	for(Practitioner practitioner:practitionerList)
 			    	{
-			    		if(practitioner instanceof DoctorRecord)
+			    		if(recordID.startsWith("DR")&& practitioner instanceof DoctorRecord)
 			    		{
-			    			if(recordID.equals(practitioner.getRecordID()));
+			    			practitionerUpdate=practitioner;
+			    			if(recordID.equals(practitioner.getRecordID()))
 			    			{
-			    				if(fieldName.equals("address")){((DoctorRecord)practitioner).setAddress(newValue);}
-			    				if(fieldName.equals("phone")){((DoctorRecord)practitioner).setPhone(newValue);}
-			    				if(fieldName.equals("location")){((DoctorRecord)practitioner).setLocation(newValue);}
+			    				if(fieldName.equalsIgnoreCase("address")){((DoctorRecord)practitioner).setAddress(newValue); recordFound=true; break;}
+			    				if(fieldName.equalsIgnoreCase("phone")){((DoctorRecord)practitioner).setPhone(newValue);recordFound=true; break;}
+			    				if(fieldName.equalsIgnoreCase("location")){((DoctorRecord)practitioner).setLocation(newValue);recordFound=true; break;}
 			    			}
 			    		}
-			    		else if(practitioner instanceof NurseRecord)
+			    		else if(recordID.startsWith("NR")&& practitioner instanceof NurseRecord)
 			    		{
-			    			if(recordID.equals(practitioner.getRecordID()));
+			    			practitionerUpdate=practitioner;
+			    			if(recordID.equals(practitioner.getRecordID()))
 			    			{
-			    				if(fieldName.equals("designation")){((NurseRecord)practitioner).setDesignation(newValue);}
-			    				if(fieldName.equals("status")){((NurseRecord)practitioner).setStatus(newValue);}
-			    				if(fieldName.equals("statusDate")){((NurseRecord)practitioner).setStatusDate(getFormattedDate(newValue));}
+			    				if(fieldName.equalsIgnoreCase("designation")){((NurseRecord)practitioner).setDesignation(newValue);recordFound=true; break;}
+			    				if(fieldName.equalsIgnoreCase("status")){((NurseRecord)practitioner).setStatus(newValue);recordFound=true; break;}
+			    				if(fieldName.equalsIgnoreCase("statusDate")){((NurseRecord)practitioner).setStatusDate(getFormattedDate(newValue));recordFound=true; break;}
 			    			}
 			    		}
+			    		
 			    	}
+			    	if(recordFound) break;
 		        }
 			}
-			
+			if(practitionerUpdate instanceof DoctorRecord)
+				logger.info("Doctor Record updated :\nRecordID \"" +  practitionerUpdate.getRecordID() +  "\", FirstName \"" +  practitionerUpdate.getFirstName() + 
+						"\", LastName \"" +  practitionerUpdate.getLastName() +  "\", Address \"" +  ((DoctorRecord)practitionerUpdate).getAddress() +  "\", Phone \"" + ((DoctorRecord)practitionerUpdate).getPhone() + "\", Specialization \"" + 
+						((DoctorRecord)practitionerUpdate).getSpecialization() + "\", Location \""+((DoctorRecord)practitionerUpdate).getLocation()+"\"");
+			if(practitionerUpdate instanceof NurseRecord)
+				logger.info("!!!Nurse Record updated :\nRecordID \"" +  practitionerUpdate.getRecordID() +  "\", FirstName \"" +   practitionerUpdate.getFirstName()  + 
+						"\", LastName \"" +  practitionerUpdate.getLastName() +  "\", Designation \"" +  ((NurseRecord)practitionerUpdate).getDesignation() +  "\", status \"" + ((NurseRecord)practitionerUpdate).getStatus() + "\", StatusDate \"" + 
+						((NurseRecord)practitionerUpdate).getStatusDate()+ "\"" );	
+			isSucess=true;
 		}
-		logger.info("Record updated for recordID: "+recordID);
-		return true;
+		
+		else
+		{
+			logger.info(" could not update nurse record with record ID: "+recordID+"Invalid field name: "+fieldName);
+		}
+		
+		return isSucess;
 	}
 	
 	
@@ -321,7 +354,7 @@ public class ClinicServer extends Thread implements ManagerInterface {
 	{
 		Date formattedDate=null;
 	try {
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 		formattedDate =sdf.parse(dateStr);
 	} catch (ParseException e) {
 		// TODO Auto-generated catch block
@@ -337,8 +370,8 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		Registry rmiRegistry = LocateRegistry.createRegistry(defaultRegistryPort);
 
 		ClinicServer MTLServer = new ClinicServer("MTL",6001);
-		ClinicServer LVLServer = new ClinicServer("LVL",6002);
-		ClinicServer DDOServer = new ClinicServer("DDO",6003);
+		ClinicServer LVLServer = new ClinicServer("LVL",6005);
+		ClinicServer DDOServer = new ClinicServer("DDO",6010);
 
 		Remote objremote1 = UnicastRemoteObject.exportObject(MTLServer,defaultRegistryPort);
 		rmiRegistry.bind("MTL", objremote1);
@@ -356,9 +389,9 @@ public class ClinicServer extends Thread implements ManagerInterface {
 		DDOServer.start();
 		System.out.println("Dollard server up and running!");
 
-		//loadData(MTLServer);
-		//loadData(LVLServer);
-		//loadData(DDOServer);
+		loadData(MTLServer);
+		loadData(LVLServer);
+		loadData(DDOServer);
 
 		clinicServers = new ArrayList<ClinicServer>();
 		clinicServers.add(MTLServer);
