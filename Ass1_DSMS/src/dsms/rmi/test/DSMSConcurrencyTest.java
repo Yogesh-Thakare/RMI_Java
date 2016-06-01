@@ -49,7 +49,7 @@ public class DSMSConcurrencyTest
 	}
 
 	/**
-	 * Test server access method
+	 * Test server access for concurrency
 	 * @throws Exception
 	 */
 	@Test
