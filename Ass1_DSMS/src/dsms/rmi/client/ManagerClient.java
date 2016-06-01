@@ -303,7 +303,7 @@ public class ManagerClient extends Thread
 					resultDRecord = objServer.createDRecord (firstName,lastName,address,phone,specialization,location);
 					if(resultDRecord)
 					{
-						System.out.println("Doctor  Record Created Successfully by " + ManagerID);
+						//System.out.println("Doctor  Record Created Successfully by " + ManagerID);
 						ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
 					}
 					showMenu();
@@ -340,7 +340,7 @@ public class ManagerClient extends Thread
 					resultNRecord = objServer.createNRecord (firstName,lastName,designation,status,date2);
 					if(resultNRecord)
 					{
-						System.out.println("Nurse Record Created Successfully by" + ManagerID);
+						//System.out.println("Nurse Record Created Successfully by" + ManagerID);
 						ManagerClient.log.info("Doctor  Record Created Successfully by " + ManagerID);
 					}
 					showMenu();
@@ -351,7 +351,7 @@ public class ManagerClient extends Thread
 					System.out.println("Record Type: ");
 					recordType = InputStringValidation(keyboard);
 					String count=objServer.getRecordCounts (recordType);
-					System.out.println("The Count for the " + recordType + " Records is :" + count );
+					//System.out.println("The Count for the " + recordType + " Records is :" + count );
 					ManagerClient.log.info("The Count for the " + recordType + " Records is :" + count);
 					showMenu();
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
@@ -369,7 +369,7 @@ public class ManagerClient extends Thread
 					editRecordResult=objServer.editRecord(recordID,fieldName,newValue);
 					if(editRecordResult)
 					{
-						System.out.println("Edit Record successfully by " + ManagerID);
+						//System.out.println("Edit Record successfully by " + ManagerID);
 						ManagerClient.log.info("Edit Record successfully by " + ManagerID);
 					}
 					showMenu();
