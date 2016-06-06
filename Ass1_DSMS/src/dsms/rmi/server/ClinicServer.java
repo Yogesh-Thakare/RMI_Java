@@ -1,7 +1,9 @@
 package dsms.rmi.server;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -33,6 +35,7 @@ public class ClinicServer extends Thread implements ManagerInterface
 	private HashMap<Character, ArrayList<Practitioner>> practitionerRecords = 
 			new HashMap<Character, ArrayList<Practitioner>>();
 	private String clinicName;
+	private static String staticRecordType;
 	private int UDPPort;
 	private static ArrayList<ClinicServer> clinicServers = null;
 	private Logger logger;
@@ -98,30 +101,33 @@ public class ClinicServer extends Thread implements ManagerInterface
 	 */
 	public void run()
 	{
-		DatagramSocket socket = null;
-
-		try
+		DatagramSocket datagramSocket=null;
+		try 
 		{
-			socket = new DatagramSocket(this.UDPPort);
-			byte[] message = new byte[1000];
-
+			datagramSocket = new DatagramSocket(UDPPort);
+			byte [] buffer = new byte [1000];
+			DatagramPacket request;
+			DatagramPacket reply;
 			while(true)
 			{
-				DatagramPacket request = new DatagramPacket(message, message.length);
-				socket.receive(request);
-				String data = new String(request.getData());
-				String response = getRecordsFromServer(data);
-				DatagramPacket reply = new DatagramPacket(response.getBytes(),response.length(),request.getAddress(),request.getPort());
-				socket.send(reply);
+				request = new DatagramPacket(buffer, buffer.length);
+				datagramSocket.receive(request);
+				buffer = (clinicName + ":" + getRecordsFromServer(staticRecordType)).getBytes();
+				reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
+				datagramSocket.send(reply);
 			}
-		}
-		catch(Exception ex)
+		} 
+		catch (SocketException e) 
 		{
-			ex.printStackTrace();
+			System.out.println("SocketException : " + e.getMessage());
+		} 
+		catch (IOException e) 
+		{
+			System.out.println("IOException : " + e.getMessage());
 		}
 		finally
 		{
-			socket.close();
+			datagramSocket.close();
 		}
 	}
 	
@@ -137,9 +143,10 @@ public class ClinicServer extends Thread implements ManagerInterface
 		++drRecord;
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
-		//use of synchronized block here lock is achieved on each record inside list using fine grain locking
+		//use of synchronized block here lock is achieved on each record inside list 
 		synchronized(practitionerRecords) 
 		{
+			
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
 			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
 			{
@@ -176,7 +183,7 @@ public class ClinicServer extends Thread implements ManagerInterface
 		++nrRecord;
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
-		//use of synchronized block here lock is achieved on each record inside list using fine grain locking
+		//use of synchronized block here lock is achieved on each record inside list 
 		synchronized(practitionerRecords) 
 		{
 			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
@@ -233,42 +240,77 @@ public class ClinicServer extends Thread implements ManagerInterface
 	@Override
 	public String getRecordCounts(String recordType) throws RemoteException 
 	{
-	String response = null;
+		DatagramSocket datagramSocket=null;
+		staticRecordType=recordType;
 		
-			response += getRecordsFromServer(recordType);
-			for(ClinicServer Server : clinicServers)
+		try 
+		{
+			// Create a Datagram Socket and bind it to a local port
+			datagramSocket = new DatagramSocket();
+			// Place data in byte array
+			String data;
+			byte [] message;
+			InetAddress host = InetAddress.getByName("localhost");
+			DatagramPacket request1;
+			DatagramPacket request2;
+			DatagramPacket reply1;
+			DatagramPacket reply2;
+			// Create a Datagram Packet to send the request to the server
+			if(UDPPort == 6001)
 			{
-				synchronized(Server)
-				{
-					if(!Server.clinicName.equals(this.clinicName))
-					{
-						DatagramSocket socket = null;
-						try
-						{
-							socket = new DatagramSocket();
-							byte[] message = (recordType).getBytes();
-							InetAddress host = InetAddress.getByName("localhost");
-							int port = Server.getUDPPort();
-							DatagramPacket request = new DatagramPacket(message, (recordType).length(),host,port);
-							socket.send(request);
-							byte[] buffer = new byte[100];
-							DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-							socket.receive(reply);
-							response+=new String(reply.getData());
-						}	
-						catch(Exception ex)
-						{
-							ex.printStackTrace();
-						}
-						finally
-						{
-							socket.close();
-						}
-					}
-				}
+				data = "MTL";
+				message = data.getBytes();
+				request1 = new DatagramPacket(message, data.length(), host, 6002);
+				request2 = new DatagramPacket(message, data.length(), host, 6003);
 			}
-		logger.info("Successfully fetched record counts from all servers using UDP as: "+response);		
-		return response;	 
+			else if(UDPPort == 6002)
+			{
+				data = "LVL";
+				message = data.getBytes();
+				request1 = new DatagramPacket(message, data.length(), host, 6001);
+				request2 = new DatagramPacket(message, data.length(), host, 6003);
+			}
+			else if(UDPPort == 6003)
+			{
+				data = "DDO";
+				message = data.getBytes();
+				request1 = new DatagramPacket(message, data.length(), host, 6001);
+				request2 = new DatagramPacket(message, data.length(), host, 6002);
+			}
+			else
+			{
+				logger.info("Error getting record counts : Invalid Port number");
+				return "Error getting record counts : Invalid Port number";
+			}
+			datagramSocket.send(request1);
+			message = new byte [1000];
+			reply1 = new DatagramPacket(message, message.length);
+			datagramSocket.receive(reply1);
+			datagramSocket.send(request2);
+			message = new byte [1000];
+			reply2 = new DatagramPacket(message, message.length);
+			datagramSocket.receive(reply2);
+			String formattedReply1=new String(reply1.getData(), reply1.getOffset(), reply1.getLength());
+			String formattedReply2=new String(reply2.getData(), reply2.getOffset(), reply2.getLength());
+			
+			logger.info(clinicName + ":" + getRecordsFromServer(staticRecordType)+","+ formattedReply1 + "," + formattedReply2);
+			return clinicName + ":" + getRecordsFromServer(staticRecordType)+","+ formattedReply1 + "," + formattedReply2;
+					
+		} 
+		catch (SocketException e) 
+		{
+			System.out.println("SocketException : " + e.getMessage());
+		} 
+		catch (IOException e) 
+		{
+			System.out.println("IOException : " + e.getMessage());
+		}
+		finally
+		{
+			datagramSocket.close();
+		}
+		logger.info("Error getting record counts : Socket Excpetion");
+		return "Error getting record counts : Socket Excpetion";
 	}
 	
 	/**
@@ -278,9 +320,32 @@ public class ClinicServer extends Thread implements ManagerInterface
 	 */
 	private String getRecordsFromServer(String recordType)
 	{
-		int recordCount=0;
+/*		int recordCount=0;
 		StringBuilder recordString = new StringBuilder();
 		recordString.append(clinicName+" ");
+		Iterator<?> it = practitionerRecords.entrySet().iterator();
+		while(it.hasNext())
+		{
+			@SuppressWarnings("rawtypes")
+			Map.Entry pair = (Map.Entry)it.next();
+			@SuppressWarnings("unchecked")
+			ArrayList<Practitioner> practitionerList = (ArrayList<Practitioner>) pair.getValue();
+			if(!practitionerList.isEmpty())
+			{					
+				for(Practitioner practitioner : practitionerList)
+				{
+					if(practitioner.getRecordID().startsWith(recordType))
+					{
+						recordCount++;
+					}
+				}
+			}
+		}
+		recordString.append(recordCount);
+		return recordString.toString();*/
+		
+		int recordCount=0;
+		StringBuilder recordString = new StringBuilder();
 		Iterator<?> it = practitionerRecords.entrySet().iterator();
 		while(it.hasNext())
 		{
@@ -399,19 +464,19 @@ public class ClinicServer extends Thread implements ManagerInterface
 		{
 			
 			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "lvl");
-			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
+			//server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
 			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "lvl");
 		}
 		//load database for Dollard server
 		else
 		{
 			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "ddo");
-			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
-			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
+			//server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
+			//server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
 		}
 		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
 		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("24-05-2015"));
-		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
+		//server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
 	}
 	
 	/**
