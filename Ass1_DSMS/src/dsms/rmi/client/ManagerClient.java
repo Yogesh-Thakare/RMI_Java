@@ -21,7 +21,7 @@ import dsms.rmi.intermediate.ManagerInterface;
  * This represents client which is itself thread object for implementing multithreading demo
  *
  */
-public class ManagerClient extends Thread
+public class ManagerClient implements Runnable
 {
 	private static Logger log;
 	private Scanner scanner;
@@ -31,6 +31,8 @@ public class ManagerClient extends Thread
 	static final String MTL = "Montreal", LVL = "Laval",
 			DDO = "Dollard-des-Ormeaux";
 	protected static String ManagerID;
+	private Thread t;
+	private String threadName;
 
 	/**
 	 * This is a constructor to create a log file
@@ -38,11 +40,11 @@ public class ManagerClient extends Thread
 	 */
 	public ManagerClient(String string) 
 	{
-		this.setName(string);
+		threadName=string;
 		scanner = new Scanner(System.in);
-		createLog();
+		createLog(threadName);
 		System.setSecurityManager(new RMISecurityManager());
-		this.start();
+		this.run();
 	}
 
 	/**
@@ -396,20 +398,27 @@ public class ManagerClient extends Thread
 	/**
 	 * creates log file for each manager who gets in to system
 	 */
-	public void createLog()
+	public void createLog(String threadName)
 	{
 		try 
 		{
-			log = Logger.getLogger(this.getName());
-			FileHandler fileHandler = new FileHandler(this.getName() + ".log");
+			log = Logger.getLogger(threadName);
+			FileHandler fileHandler = new FileHandler(threadName + ".log");
 			log.addHandler(fileHandler);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fileHandler.setFormatter(formatter);
-			log.info("Log file created for ManagerClient " + this.getName() );
+			log.info("Log file created for ManagerClient " + threadName);
 		} 
 		catch (SecurityException | IOException e) 
 		{
 			log.info("Log File Error: " + e.getMessage());
 		}
 	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
