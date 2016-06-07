@@ -4,6 +4,7 @@ package dsms.rmi.client;
 import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
+import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +22,7 @@ import dsms.rmi.intermediate.ManagerInterface;
  * This represents client which is itself thread object for implementing multithreading demo
  *
  */
-public class ManagerClient implements Runnable
+public class ManagerClient extends Thread
 {
 	private static Logger log;
 	private Scanner scanner;
@@ -31,8 +32,6 @@ public class ManagerClient implements Runnable
 	static final String MTL = "Montreal", LVL = "Laval",
 			DDO = "Dollard-des-Ormeaux";
 	protected static String ManagerID;
-	private Thread t;
-	private String threadName;
 
 	/**
 	 * This is a constructor to create a log file
@@ -40,11 +39,13 @@ public class ManagerClient implements Runnable
 	 */
 	public ManagerClient(String string) 
 	{
-		threadName=string;
+		
+		this.setName(string);
 		scanner = new Scanner(System.in);
-		createLog(threadName);
+		createLog();
 		System.setSecurityManager(new RMISecurityManager());
-		this.run();
+		this.start();
+		
 	}
 
 	/**
@@ -170,7 +171,83 @@ public class ManagerClient implements Runnable
 		System.out.println("2. Create Nurse Record.");
 		System.out.println("3. Get Record count");
 		System.out.println("4. Edit record");
-		System.out.println("5. Exit");
+		System.out.println("5. Show Concurrency Test");
+		System.out.println("6. Exit");
+	}
+	
+	
+	public static void runMultithreadDemo()
+	{
+	
+		new ManagerClient("MTLThread").start();
+	
+		new ManagerClient("LVLThread").start();
+
+		new ManagerClient("DDOThread").start();
+		
+	}
+	
+	public void run()
+	{
+		if(getName().equals("MTLThread"))
+		{
+		for (int i = 0; i < 100; i++) 
+		{
+			try 
+			{
+				ManagerInterface serverAccess=LocateServer("MTL");
+				serverAccess.editRecord("DR10001", "location", "lvl");
+				sleep((int) (Math.random() * 2000));
+			} 
+			catch (InterruptedException e) 
+			{
+			}
+			catch (RemoteException e) 
+			{
+			}
+		}
+		System.out.println("Test Finished for: " + getName());
+		}
+		else if(getName().equals("LVLThread"))
+		{
+		for (int i = 0; i < 100; i++) 
+		{
+			try 
+			{
+				
+				ManagerInterface serverAccess=LocateServer("LVL");
+				serverAccess.editRecord("DR10002", "location", "ddo");
+				sleep((int) (Math.random() * 2000));
+			} 
+			catch (InterruptedException e) 
+			{
+			}
+			catch (RemoteException e) 
+			{
+			}
+		}
+		System.out.println("Test Finished for: " + getName());
+		}
+		else if(getName().equals("DDOThread"))
+		{
+		for (int i = 0; i < 100; i++) 
+		{
+			try 
+			{
+				
+				ManagerInterface serverAccess=LocateServer("DDO");
+				serverAccess.editRecord("DR10003", "location", "mtl");
+				sleep((int) (Math.random() * 2000));
+			} 
+			catch (InterruptedException e) 
+			{
+			}
+			catch (RemoteException e) 
+			{
+			}
+		}
+		System.out.println("Test Finished for: " + getName());
+		}
 	}
 
 	/**
@@ -378,6 +455,10 @@ public class ManagerClient implements Runnable
 					userInput = Integer.parseInt(InputStringValidation(keyboard));
 					break;
 				case 5:
+					System.out.println("Concurrency Test has began....");
+					runMultithreadDemo();
+					
+				case 6:
 					System.out.println("Have a nice day!");
 					ManagerClient.log.info("Manager opted for EXIT option");
 					keyboard.close();
@@ -398,27 +479,20 @@ public class ManagerClient implements Runnable
 	/**
 	 * creates log file for each manager who gets in to system
 	 */
-	public void createLog(String threadName)
+	public void createLog()
 	{
 		try 
 		{
-			log = Logger.getLogger(threadName);
-			FileHandler fileHandler = new FileHandler(threadName + ".log");
+			log = Logger.getLogger(this.getName());
+			FileHandler fileHandler = new FileHandler(this.getName() + ".log");
 			log.addHandler(fileHandler);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fileHandler.setFormatter(formatter);
-			log.info("Log file created for ManagerClient " + threadName);
+			log.info("Log file created for ManagerClient " + this.getName() );
 		} 
 		catch (SecurityException | IOException e) 
 		{
 			log.info("Log File Error: " + e.getMessage());
 		}
 	}
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
