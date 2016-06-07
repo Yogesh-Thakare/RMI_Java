@@ -144,31 +144,31 @@ public class ClinicServer extends Thread implements ManagerInterface
 		Practitioner Practitioner=new DoctorRecord("DR"+drRecord,firstName,lastName,address,phone,specialization,location);
 		
 		//use of synchronized block here lock is achieved on each record inside list 
-		synchronized(practitionerRecords) 
-		{
+		ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
 			
-			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
-			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
-			{
-				practitionerList = new ArrayList<Practitioner>();
-				practitionerList.add(Practitioner);
-				practitionerRecords.put(lastName.charAt(0), practitionerList);
-			}
-			else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
-			{
+		if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
+		{
+			practitionerList = new ArrayList<Practitioner>();
 			practitionerList.add(Practitioner);
-			}
-			else
+			practitionerRecords.put(lastName.charAt(0), practitionerList);
+		}
+		else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
+		{
+			synchronized(practitionerList)
 			{
-				logger.info("Failed to add Doctor Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
-				return false;
+				practitionerList.add(Practitioner);
 			}
+		}
+		else
+		{
+			logger.info("Failed to add Doctor Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+			return false;
+		}
 			logger.info("Doctor Record created :\nRecordID \"" +  "DR"+drRecord +  "\", FirstName \"" +  firstName + 
 					"\", LastName \"" +  lastName +  "\", Address \"" +  address +  "\", Phone \"" + phone + "\", Specialization \"" + 
 					specialization + "\", Location \""+location+"\"");
 			
-			return true;
-		}	
+		return true;
 	}
 	
 	/* 
@@ -184,33 +184,32 @@ public class ClinicServer extends Thread implements ManagerInterface
 		Practitioner Practitioner=new NurseRecord("NR"+nrRecord,firstName,lastName,designation,status,statusDate);
 		
 		//use of synchronized block here lock is achieved on each record inside list 
-		synchronized(practitionerRecords) 
+		ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
+		if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0))) 
 		{
-			ArrayList<Practitioner> practitionerList = practitionerRecords.get(lastName.charAt(0));
-			if(practitionerList == null && checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0))) 
-			{
-				practitionerList = new ArrayList<Practitioner>();
-				practitionerList.add(Practitioner);
-				practitionerRecords.put(lastName.charAt(0), practitionerList);
-			
-			}
-			else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
-			{
+			practitionerList = new ArrayList<Practitioner>();
 			practitionerList.add(Practitioner);
-			
-			}
-			else
+			practitionerRecords.put(lastName.charAt(0), practitionerList);
+		}
+		else if(checkUniqueRecord(Practitioner.getRecordID(),Practitioner.getFirstName(),Practitioner.getLastName(),lastName.charAt(0)))
+		{
+			synchronized(practitionerList)
 			{
-				logger.info("Failed to add Nurse Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
-				return false;
+				practitionerList.add(Practitioner);
 			}
+		}
+		else
+		{
+			logger.info("Failed to add Nurse Record with record ID : "+Practitioner.getRecordID()+" duplicate record ID");
+			return false;
+		}
 			logger.info("Nurse Record created :\nRecordID \"" +  "NR"+nrRecord +  "\", FirstName \"" +  firstName + 
 					"\", LastName \"" +  lastName +  "\", Designation \"" +  designation +  "\", status \"" + status + "\", StatusDate \"" + 
 					statusDate+ "\"" );
-			return true;
-		}	
+			
+		return true;
 	}
-	
+		
 	/**
 	 * checks if record already present with given recordID
 	 * @param recordID
@@ -319,31 +318,7 @@ public class ClinicServer extends Thread implements ManagerInterface
 	 * @return count of records
 	 */
 	private String getRecordsFromServer(String recordType)
-	{
-/*		int recordCount=0;
-		StringBuilder recordString = new StringBuilder();
-		recordString.append(clinicName+" ");
-		Iterator<?> it = practitionerRecords.entrySet().iterator();
-		while(it.hasNext())
-		{
-			@SuppressWarnings("rawtypes")
-			Map.Entry pair = (Map.Entry)it.next();
-			@SuppressWarnings("unchecked")
-			ArrayList<Practitioner> practitionerList = (ArrayList<Practitioner>) pair.getValue();
-			if(!practitionerList.isEmpty())
-			{					
-				for(Practitioner practitioner : practitionerList)
-				{
-					if(practitioner.getRecordID().startsWith(recordType))
-					{
-						recordCount++;
-					}
-				}
-			}
-		}
-		recordString.append(recordCount);
-		return recordString.toString();*/
-		
+	{	
 		int recordCount=0;
 		StringBuilder recordString = new StringBuilder();
 		Iterator<?> it = practitionerRecords.entrySet().iterator();
@@ -395,12 +370,14 @@ public class ClinicServer extends Thread implements ManagerInterface
 				fieldName.equalsIgnoreCase("designation")||fieldName.equalsIgnoreCase("status")||fieldName.equalsIgnoreCase("statusDate"))
 		{
 			Practitioner practitionerUpdate=null;
-			synchronized(practitionerRecords) 
-			{
-				boolean recordFound=false;
-			    for (Map.Entry<Character, ArrayList<Practitioner>> entry : practitionerRecords.entrySet())
-		        {
-			    	ArrayList<Practitioner> practitionerList = entry.getValue();
+			/*synchronized(practitionerRecords) 
+			{*/
+			boolean recordFound=false;
+			for (Map.Entry<Character, ArrayList<Practitioner>> entry : practitionerRecords.entrySet())
+		    {
+			    ArrayList<Practitioner> practitionerList = entry.getValue();
+			    synchronized(practitionerList) 
+			    {
 			    	for(Practitioner practitioner:practitionerList)
 			    	{
 			    		if(recordID.startsWith("DR")&& practitioner instanceof DoctorRecord)
@@ -424,9 +401,9 @@ public class ClinicServer extends Thread implements ManagerInterface
 			    			}
 			    		}
 			    	}
+		        }
 			    	if(recordFound) break;
 		        }
-			}
 			if(practitionerUpdate instanceof DoctorRecord)
 				logger.info("!!!Doctor Record updated :\nRecordID \"" +  practitionerUpdate.getRecordID() +  "\", FirstName \"" +  practitionerUpdate.getFirstName() + 
 						"\", LastName \"" +  practitionerUpdate.getLastName() +  "\", Address \"" +  ((DoctorRecord)practitionerUpdate).getAddress() +  "\", Phone \"" + ((DoctorRecord)practitionerUpdate).getPhone() + "\", Specialization \"" + 
@@ -443,7 +420,6 @@ public class ClinicServer extends Thread implements ManagerInterface
 		}
 		return isSucess;
 	}
-	
 	
 	/**
 	 * Initializes database for each server with dummy records
@@ -464,19 +440,19 @@ public class ClinicServer extends Thread implements ManagerInterface
 		{
 			
 			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "lvl");
-			//server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
+			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "lvl");
 			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "lvl");
 		}
 		//load database for Dollard server
 		else
 		{
 			server.createDRecord("adoctor", "adoctor", "2150,st-hubert", "5145645655", "orthopaedic", "ddo");
-			//server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
-			//server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
+			server.createDRecord("bdoctor", "bdoctor", "5750,st-laurent", "5145645655", "surgeon", "ddo");
+			server.createDRecord("ydoctor", "ydoctor", "3150,st-marc", "5145645611", "orthopaedic", "ddo");
 		}
 		server.createNRecord("anurse", "anurse", "junior", "active",getFormattedDate("20-05-2016"));
 		server.createNRecord("ynurse", "ynurse", "senior", "terminated",getFormattedDate("24-05-2015"));
-		//server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
+		server.createNRecord("bnurse", "bnurse", "junior", "active",getFormattedDate("21-05-2016"));			
 	}
 	
 	/**
