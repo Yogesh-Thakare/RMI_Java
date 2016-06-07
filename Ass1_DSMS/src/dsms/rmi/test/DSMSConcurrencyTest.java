@@ -15,12 +15,7 @@ import dsms.rmi.intermediate.ManagerInterface;
  */
 public class DSMSConcurrencyTest 
 {
-	private static ManagerClient client1 ;
-	private static ManagerClient client2 ;
-	private static ManagerClient client3 ;
-	private static ManagerClient client4 ;
-	private static ManagerClient client5 ;
-	private static ManagerClient client6 ;
+	private static ManagerClient client[] ;
 
 	ManagerInterface serverAccess;
 
@@ -33,19 +28,24 @@ public class DSMSConcurrencyTest
 	{
 		List<ManagerClient> testClients=ManagerClient.getClients();
 
-		client1 = testClients.get(0);
-		client2 = testClients.get(0);
-		client3 = testClients.get(0);
-		client4 = testClients.get(0);
-		client5 = testClients.get(0);
-		client6 = testClients.get(0);
+		for (int i=1; i<101;i++)
+		{
+		client[i] = testClients.get(0);
+		client[i].InitializeServer("MTL");
+		}
+		
+		for (int i=101; i<201;i++)
+		{
+		client[i] = testClients.get(0);
+		client[i].InitializeServer("LVL");
+		}
+		
+		for (int i=201; i<301;i++)
+		{
+		client[i] = testClients.get(0);
+		client[i].InitializeServer("DDO");
+		}
 
-		client1.InitializeServer("MTL");
-		client2.InitializeServer("MTL");
-		client3.InitializeServer("MTL");
-		client4.InitializeServer("MTL");
-		client5.InitializeServer("MTL");
-		client6.InitializeServer("MTL");
 	}
 
 	/**
@@ -57,23 +57,30 @@ public class DSMSConcurrencyTest
 	{
 		try 
 		{
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
-
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
-
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
-
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
-
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "mtl"));
-
-			serverAccess = ManagerClient.LocateServer("MTL");
-			assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
+			for (int i=1; i<101;i++)
+			{
+			
+				serverAccess = ManagerClient.LocateServer("MTL");
+				assertTrue(serverAccess.editRecord("DR10002", "location", "lvl"));
+				//assertTrue(serverAccess.editRecord("DR10002", "location", "ddo"));
+			}
+			
+			for (int i=101; i<201;i++)
+			{
+			
+				serverAccess = ManagerClient.LocateServer("LVL");
+				assertTrue(serverAccess.editRecord("DR10004", "location", "mtl"));
+				//assertTrue(serverAccess.editRecord("DR10004", "location", "ddo"));
+			}
+			
+			for (int i=201; i<301;i++)
+			{
+			
+				serverAccess = ManagerClient.LocateServer("DDO");
+				assertTrue(serverAccess.editRecord("DR10007", "location", "mtl"));
+				//assertTrue(serverAccess.editRecord("DR10007", "location", "lvl"));
+			}
+			
 		} 
 		catch (Exception e) 
 		{
