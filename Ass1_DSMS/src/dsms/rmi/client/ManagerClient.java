@@ -197,6 +197,7 @@ public class ManagerClient extends Thread
 			{
 				ManagerInterface serverAccess=LocateServer("MTL");
 				serverAccess.editRecord("DR10001", "location", "lvl");
+				log.info("Record updated with record ID: DR10001 by MTL Thread");
 				sleep((int) (Math.random() * 2000));
 			} 
 			catch (InterruptedException e) 
@@ -217,6 +218,7 @@ public class ManagerClient extends Thread
 				
 				ManagerInterface serverAccess=LocateServer("LVL");
 				serverAccess.editRecord("DR10002", "location", "ddo");
+				log.info("Record updated with record ID: DR10002 by LVL Thread");
 				sleep((int) (Math.random() * 2000));
 			} 
 			catch (InterruptedException e) 
@@ -237,6 +239,7 @@ public class ManagerClient extends Thread
 				
 				ManagerInterface serverAccess=LocateServer("DDO");
 				serverAccess.editRecord("DR10003", "location", "mtl");
+				log.info("Record updated with record ID: DR10003 by DDO Thread");
 				sleep((int) (Math.random() * 2000));
 			} 
 			catch (InterruptedException e) 
@@ -457,7 +460,9 @@ public class ManagerClient extends Thread
 				case 5:
 					System.out.println("Concurrency Test has began....");
 					runMultithreadDemo();
-					
+					showMenu();
+					userInput = Integer.parseInt(InputStringValidation(keyboard));
+					break;		
 				case 6:
 					System.out.println("Have a nice day!");
 					ManagerClient.log.info("Manager opted for EXIT option");
